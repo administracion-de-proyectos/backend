@@ -20,7 +20,10 @@ func PanicOnError(err error) {
 }
 
 func main() {
-	PanicOnError(godotenv.Load(".env"))
+	if err := godotenv.Load(); err != nil {
+		log.Errorf("env not found, not panicking but something to check out if not using okteto, %s", err.Error())
+	}
+
 	url := os.Getenv(dbUrl)
 	if url == "" {
 		panic(fmt.Sprintf("missing url from db with format %s", dbUrl))
