@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-telegram
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - PG_USER=postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - '5432:5432'
+    networks:
+      - backend-network
+  backend:
+    container_name: backend
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - './main.go:/app/main.go'
+      - './.env:/app/.env'
+      - './src/:/app/src/'
+    environment:
+      - DB_URL=${DB_URL}
+    ports:
+      - '8001:8001'
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    name: 'backend-network'
