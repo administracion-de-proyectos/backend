@@ -27,6 +27,12 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		})
 		return
 	}
+	if len(ur.Password) < 6 {
+		c.JSON(400, gin.H{
+			"reason": "password too short",
+		})
+		return
+	}
 	if err := uc.service.CreateUser(services.CreateUserState(ur.Email, ur.Password, ur.Name, ur.Profile)); err != nil {
 		log.Errorf("could not write into db")
 		c.JSON(400, gin.H{
