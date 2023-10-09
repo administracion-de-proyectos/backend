@@ -1,0 +1,54 @@
+definitions:
+  controller.ErrorMsg:
+    properties:
+      reason:
+        example: mensaje de error
+        type: string
+    type: object
+  controller.Token:
+    properties:
+      token:
+        example: asdasfasd
+        type: string
+    type: object
+  controller.UserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      profile:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /user/signUp/:
+    post:
+      consumes:
+      - application/json
+      description: Create User Account
+      parameters:
+      - description: User required Data to SignUp
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Sign Up User
+      tags:
+      - user
+swagger: "2.0"

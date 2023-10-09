@@ -6,3 +6,11 @@ type UserRequest struct {
 	Name     string `json:"name"`
 	Profile  string `json:"profile"`
 }
+
+type Token struct {
+	Token    string `json:"token" example:"asdasfasd"`
+}
+
+type ErrorMsg struct {
+	Reason    string `json:"reason" example:"mensaje de error"`
+}

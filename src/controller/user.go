@@ -13,6 +13,16 @@ type UserController struct {
 	validator middleware.TokenValidator[UserRequest]
 }
 
+// CreateUser godoc
+// @Summary      Sign Up User
+// @Description  Create User Account 
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        user body UserRequest true "User required Data to SignUp"
+// @Success      200  {object}  Token 
+// @Failure      400  {object}  ErrorMsg
+// @Router       /user/signUp/ [post]
 func (uc UserController) CreateUser(c *gin.Context) {
 	var ur UserRequest
 	if err := c.BindJSON(&ur); err != nil {

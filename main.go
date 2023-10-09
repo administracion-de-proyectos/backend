@@ -34,6 +34,7 @@ func main() {
 		Router: gin.Default(),
 	}
 	PanicOnError(r.AddUserRoutes(url))
+	PanicOnError(r.AddSwaggerRoutes())
 	log.Infof("starting to run")
 	PanicOnError(r.Router.Run(":8001"))
 }

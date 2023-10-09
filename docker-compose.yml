@@ -26,6 +26,7 @@ services:
     volumes:
       - './main.go:/app/main.go'
       - './.env:/app/.env'
+      - './docs:/app/docs'
       - './src/:/app/src/'
     environment:
       - DB_URL=${DB_URL}
