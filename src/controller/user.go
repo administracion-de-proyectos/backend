@@ -16,7 +16,7 @@ type UserController struct {
 // CreateUser godoc
 // @Summary      Sign Up User
 // @Description  Create User Account 
-// @Tags         user
+// @Tags         signup
 // @Accept       json
 // @Produce      json
 // @Param        user body UserRequest true "User required Data to SignUp"
@@ -55,11 +55,22 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	if err != nil {
 		log.Errorf("some fuckery happened, err: %s", err.Error())
 	}
-	c.JSON(200, gin.H{
-		"token": s,
+	c.JSON(200, Token{
+		Token: s,
 	})
 }
 
+
+// SignInUser godoc
+// @Summary      SignIn User
+// @Description  SignInUser 
+// @Tags         login
+// @Accept       json
+// @Produce      json
+// @Param        user body UserRequest true "Email and Password are required"
+// @Success      200  {object}  Token 
+// @Failure      400  {object}  ErrorMsg
+// @Router       /user/login/ [post]
 func (uc UserController) SignInUser(c *gin.Context) {
 	var ur UserRequest
 	if err := c.BindJSON(&ur); err != nil {
@@ -87,8 +98,8 @@ func (uc UserController) SignInUser(c *gin.Context) {
 		if err != nil {
 			log.Errorf("some fuckery happened, err: %s", err.Error())
 		}
-		c.JSON(200, gin.H{
-			"token": s,
+		c.JSON(200, Token{
+			Token: s,
 		})
 	}
 }

@@ -25,6 +25,32 @@ definitions:
 info:
   contact: {}
 paths:
+  /user/login/:
+    post:
+      consumes:
+      - application/json
+      description: SignInUser
+      parameters:
+      - description: Email and Password are required
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: SignIn User
+      tags:
+      - login
   /user/signUp/:
     post:
       consumes:
@@ -50,5 +76,5 @@ paths:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: Sign Up User
       tags:
-      - user
+      - signup
 swagger: "2.0"
