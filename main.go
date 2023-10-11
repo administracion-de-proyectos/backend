@@ -19,6 +19,22 @@ func PanicOnError(err error) {
 	}
 }
 
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Errorf("env not found, not panicking but something to check out if not using okteto, %s", err.Error())
@@ -34,6 +50,7 @@ func main() {
 		Router: gin.Default(),
 	}
 	PanicOnError(r.AddUserRoutes(url))
+	r.Router.Use(CORSMiddleware())
 	log.Infof("starting to run")
 	PanicOnError(r.Router.Run(":8001"))
 }
