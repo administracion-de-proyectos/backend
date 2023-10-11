@@ -49,8 +49,8 @@ func main() {
 	r := routes.Routes{
 		Router: gin.Default(),
 	}
-	PanicOnError(r.AddUserRoutes(url))
 	r.Router.Use(CORSMiddleware())
+	PanicOnError(r.AddUserRoutes(url))
 	log.Infof("starting to run")
 	PanicOnError(r.Router.Run(":8001"))
 }
