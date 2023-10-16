@@ -25,6 +25,11 @@ func (s *userService) CreateUser(u UserState) error {
 	return nil
 }
 
+func (s *userService) GetUser(userId string) (UserState, error) {
+	return s.db.Get(userId)
+}
+
+
 func CreateUserService(db db.DB[UserState]) UserService {
 	return &userService{db: db}
 }

@@ -29,3 +29,5 @@ Una vez que se actualiza la documentación en un controller, se debe ejecutar
 ```bash
 swag init
 ```
+
+Documentación: https://github.com/swaggo/swag

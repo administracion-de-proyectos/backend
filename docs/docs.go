@@ -55,6 +55,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/profile/{id}": {
+            "get": {
+                "description": "Get User Profile",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "getUser"
+                ],
+                "summary": "Get User Profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/user/signUp/": {
             "post": {
                 "description": "Create User Account",
@@ -125,6 +160,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "profile": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "profile": {

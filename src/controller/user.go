@@ -104,6 +104,35 @@ func (uc UserController) SignInUser(c *gin.Context) {
 	}
 }
 
+// GetUserProfile godoc
+// @Summary      Get User Profile
+// @Description  Get User Profile
+// @Tags         getUser
+// @Param        id   path      string  true  "User ID"
+// @Produce      json
+// @Success      200  {object}  UserResponse
+// @Failure      400  {object}  ErrorMsg
+// @Router       /user/profile/{id} [get]
+func (uc UserController) GetUser(c *gin.Context) {
+	userId := c.Param("id")
+	if user, err := uc.service.GetUser(userId); err != nil {
+		log.Errorf("error while getting user: %s", err.Error())
+		c.JSON(404, gin.H{
+			"reason": "user not found",
+		})
+	} else {
+		c.JSON(200, UserResponse{
+			Email:   user.Email,
+			Name:    user.Name,
+			Profile: user.Profile,
+		})
+	}
+}
+
+
+
+
+
 func CreateUserController(s services.UserService, validator middleware.TokenValidator[UserRequest]) UserController {
 	return UserController{service: s, validator: validator}
 }

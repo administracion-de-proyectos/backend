@@ -22,6 +22,15 @@ definitions:
       profile:
         type: string
     type: object
+  controller.UserResponse:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      profile:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -51,6 +60,29 @@ paths:
       summary: SignIn User
       tags:
       - login
+  /user/profile/{id}:
+    get:
+      description: Get User Profile
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get User Profile
+      tags:
+      - getUser
   /user/signUp/:
     post:
       consumes:
