@@ -8,9 +8,20 @@ type UserRequest struct {
 }
 
 type Token struct {
-	Token    string `json:"token" example:"asdasfasd"`
+	Token string `json:"token" example:"asdasfasd"`
 }
 
 type ErrorMsg struct {
-	Reason    string `json:"reason" example:"mensaje de error"`
+	Reason string `json:"reason" example:"mensaje de error"`
+}
+
+type CourseRequest struct {
+	Title   string  `json:"title"`
+	Classes []Class `json:"classes"`
+}
+
+type Class struct {
+	Title       string      `json:"title"`
+	CourseTitle string      `json:"course_title"`
+	Metadata    interface{} `json:"metadata"`
 }

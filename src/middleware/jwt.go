@@ -12,6 +12,8 @@ type TokenValidator[T any] interface {
 	CreateToken(data T) (string, error)
 	ValidateToken(token string) error
 	GetData(token string) (T, error)
+	SetTokenDataInContext(c *gin.Context)
+	GetTokenData(c *gin.Context) (T, error)
 }
 
 type TokenValidatorRequest interface {
@@ -71,6 +73,24 @@ func (t *tokenValidator[T]) GetData(tokenString string) (T, error) {
 	}
 	res := data.Data
 	return res, err
+}
+
+func (t *tokenValidator[T]) SetTokenDataInContext(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+	if err := t.ValidateToken(token); err != nil {
+		c.AbortWithStatusJSON(401, gin.H{
+			"reason": "token invalid",
+		})
+		return
+	}
+	data, _ := t.GetData(token)
+	c.Set("token data", data)
+	c.Next()
+}
+
+func (t *tokenValidator[T]) GetTokenData(c *gin.Context) (T, error) {
+	token := c.GetHeader("Authorization")
+	return t.GetData(token)
 }
 
 func CreateValidator[T any](secret string) TokenValidator[T] {

@@ -1,5 +1,7 @@
 package services
 
+import "fmt"
+
 type UserState struct {
 	Email    string
 	Password string
@@ -30,4 +32,37 @@ func CreateBasicUserState(email, password string) UserState {
 		Email:    email,
 		Password: password,
 	}
+}
+
+type CourseState struct {
+	CreatorEmail string
+	CourseTitle  string
+	Classes      []string
+}
+
+func (cs CourseState) GetPrimaryKey() string {
+	return cs.CourseTitle
+}
+
+type Class struct {
+	Id          string
+	CourseTitle string
+	Metadata    interface{} // For any shit that the frontend wants to throw at us
+}
+
+func (cs Class) GetPrimaryKey() string {
+	return getClassId(cs.CourseTitle, cs.Id)
+}
+
+func getClassId(courseTitle, classTitle string) string {
+	return fmt.Sprintf("%s-%s", courseTitle, classTitle)
+}
+
+type CourseService interface {
+	SetClassInPlaceN(n int, classTitle string, courseTitle string) CourseState
+	AddClass(class Class, shouldEditCourse bool) (CourseState, error)
+	AddCourse(course CourseState) CourseState
+	GetCourse(courseId string) (CourseState, error)
+	RemoveClass(courseId, classId string) error
+	GetClass(courseId, classId string) (Class, error)
 }

@@ -51,6 +51,7 @@ func main() {
 	}
 	r.Router.Use(CORSMiddleware())
 	PanicOnError(r.AddUserRoutes(url))
+	PanicOnError(r.AddCoursesRoutes(url))
 	PanicOnError(r.AddSwaggerRoutes())
 	log.Infof("starting to run")
 	PanicOnError(r.Router.Run(":8001"))

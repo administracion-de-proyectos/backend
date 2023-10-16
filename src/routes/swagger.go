@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"github.com/swaggo/gin-swagger"
-	"github.com/swaggo/files"
 	"backend-admin-proyect/docs"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 )
 
 func (r Routes) AddSwaggerRoutes() error {
