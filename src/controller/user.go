@@ -130,8 +130,57 @@ func (uc UserController) GetUser(c *gin.Context) {
 }
 
 
-
-
+// UpdateProfile godoc
+// @Summary      Update User Profile
+// @Description  Update User Profile
+// @Tags         updateUser
+// @Param        id   path      string  true  "User ID"
+// @Param        user body UserRequest true "Profile and Name are updatable"
+// @Produce      json
+// @Success      200  {object}  UserResponse
+// @Failure      400  {object}  ErrorMsg
+// @Router       /user/profile/{id} [patch]
+func (uc UserController) UpdateUser(c *gin.Context) {
+	userId := c.Param("id")
+	var ur UserRequest
+	if err := c.BindJSON(&ur); err != nil {
+		c.JSON(400, gin.H{
+			"reason": err.Error(),
+		})
+		return
+	}
+	if user, err := uc.service.GetUser(userId); err != nil {
+		log.Errorf("error while getting user: %s", err.Error())
+		c.JSON(404, gin.H{
+			"reason": "user not found",
+		})
+		return
+	} else {
+		if ur.Profile == ""{
+			log.Infof("No se intenta modificar profile")
+		} else {
+			user.Profile = ur.Profile
+		}
+		if ur.Name == ""{
+			log.Infof("No se intenta modificar Name")
+		} else {
+			user.Name = ur.Name
+		}
+		if updatedUser, err := uc.service.UpdateUser(user); err != nil {
+			log.Errorf("error while updating user: %s", err.Error())
+			c.JSON(404, gin.H{
+				"reason": err.Error(),
+			})
+			return
+		} else {
+			c.JSON(200, UserResponse{
+				Email:   updatedUser.Email,
+				Name:    updatedUser.Name,
+				Profile: updatedUser.Profile,
+			})
+		}
+	}
+}
 
 func CreateUserController(s services.UserService, validator middleware.TokenValidator[UserRequest]) UserController {
 	return UserController{service: s, validator: validator}

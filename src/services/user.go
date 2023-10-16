@@ -29,6 +29,11 @@ func (s *userService) GetUser(userId string) (UserState, error) {
 	return s.db.Get(userId)
 }
 
+func (s *userService) UpdateUser(u UserState) (UserState, error) {
+	s.db.Update(u)
+	return s.db.Get(u.GetPrimaryKey())
+}
+
 
 func CreateUserService(db db.DB[UserState]) UserService {
 	return &userService{db: db}
