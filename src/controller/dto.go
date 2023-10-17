@@ -7,6 +7,12 @@ type UserRequest struct {
 	Profile  string `json:"profile"`
 }
 
+type UserResponse struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Profile  string `json:"profile"`
+}
+
 type Token struct {
 	Token string `json:"token" example:"asdasfasd"`
 }

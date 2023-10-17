@@ -16,6 +16,8 @@ func (us UserState) GetPrimaryKey() string {
 type UserService interface {
 	CreateUser(u UserState) error
 	CheckCredentials(u UserState) (UserState, error)
+	GetUser(userId string) (UserState, error)
+	UpdateUser(u UserState) (UserState, error)
 }
 
 func CreateUserState(email, password, name, profile string) UserState {
