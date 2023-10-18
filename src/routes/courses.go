@@ -25,5 +25,6 @@ func (r Routes) AddCoursesRoutes(dbUrl string) error {
 	group.GET("/:id", c.GetCourse)
 	group.GET("/:id/:classId", c.GetClass)
 	group.DELETE("/:id/:classId", c.RemoveClass)
+	group.GET("/", c.GetCourses)
 	return nil
 }

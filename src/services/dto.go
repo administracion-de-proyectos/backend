@@ -67,4 +67,5 @@ type CourseService interface {
 	GetCourse(courseId string) (CourseState, error)
 	RemoveClass(courseId, classId string) error
 	GetClass(courseId, classId string) (Class, error)
+	GetCourses(title, ownerEmail string) []CourseState
 }

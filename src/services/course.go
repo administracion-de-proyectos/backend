@@ -3,6 +3,7 @@ package services
 import (
 	"backend-admin-proyect/src/db"
 	"backend-admin-proyect/src/utils"
+	"strings"
 )
 
 type classService struct {
@@ -78,6 +79,17 @@ func (c *classService) RemoveClass(courseId, classId string) error {
 
 func (c *classService) GetClass(courseId, classId string) (Class, error) {
 	return c.classDB.Get(getClassId(courseId, classId))
+}
+
+func (c *classService) GetCourses(title, ownerEmail string) []CourseState {
+	courses, _ := c.courseDB.GetAll()
+	filtered := make([]CourseState, 0)
+	for _, course := range courses {
+		if strings.Contains(course.CourseTitle, title) && strings.Contains(course.CreatorEmail, ownerEmail) {
+			filtered = append(filtered, course)
+		}
+	}
+	return filtered
 }
 
 func CreateCourseService(courseDb db.DB[CourseState], classDb db.DB[Class]) *classService {

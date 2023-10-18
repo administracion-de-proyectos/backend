@@ -129,6 +129,16 @@ func (ce Course) GetClass(c *gin.Context) {
 	}
 }
 
+func (ce Course) GetCourses(c *gin.Context) {
+	title := c.Query("title")
+	ownerEmail := c.Query("ownerEmail")
+	courses := ce.service.GetCourses(title, ownerEmail)
+	c.JSON(200, gin.H{
+		"courses": courses,
+		"amount":  len(courses),
+	})
+}
+
 func CreateControllerCourse(s services.CourseService, validator middleware.TokenValidator[UserRequest]) Course {
 	return Course{
 		service: s,
