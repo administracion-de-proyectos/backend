@@ -25,6 +25,7 @@ func (r Routes) AddUserRoutes(dbUrl string) error {
 	group.POST("/signUp", c.CreateUser)
 	group.GET("/validateToken", validateToken)
 	group.GET("/profile/:id", c.GetUser)
+	group.GET("/profile/", validator.SetTokenDataInContext, c.GetUserWithToken)
 	group.PATCH("/profile/:id", c.UpdateUser)
 	return nil
 }

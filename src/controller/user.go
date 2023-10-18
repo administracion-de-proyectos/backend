@@ -60,15 +60,14 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	})
 }
 
-
 // SignInUser godoc
 // @Summary      SignIn User
-// @Description  SignInUser 
+// @Description  SignInUser
 // @Tags         login
 // @Accept       json
 // @Produce      json
 // @Param        user body UserRequest true "Email and Password are required"
-// @Success      200  {object}  Token 
+// @Success      200  {object}  Token
 // @Failure      400  {object}  ErrorMsg
 // @Router       /user/login/ [post]
 func (uc UserController) SignInUser(c *gin.Context) {
@@ -115,6 +114,10 @@ func (uc UserController) SignInUser(c *gin.Context) {
 // @Router       /user/profile/{id} [get]
 func (uc UserController) GetUser(c *gin.Context) {
 	userId := c.Param("id")
+	uc.sendUserWithId(c, userId)
+}
+
+func (uc UserController) sendUserWithId(c *gin.Context, userId string) {
 	if user, err := uc.service.GetUser(userId); err != nil {
 		log.Errorf("error while getting user: %s", err.Error())
 		c.JSON(404, gin.H{
@@ -128,7 +131,18 @@ func (uc UserController) GetUser(c *gin.Context) {
 		})
 	}
 }
-
+func (uc UserController) GetUserWithToken(c *gin.Context) {
+	userTokenData, err := uc.validator.GetTokenData(c)
+	if err != nil {
+		log.Errorf("error while checking token: %s", err.Error())
+		c.JSON(403, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	userId := userTokenData.Email
+	uc.sendUserWithId(c, userId)
+}
 
 // UpdateProfile godoc
 // @Summary      Update User Profile
@@ -156,12 +170,12 @@ func (uc UserController) UpdateUser(c *gin.Context) {
 		})
 		return
 	} else {
-		if ur.Profile == ""{
+		if ur.Profile == "" {
 			log.Infof("No se intenta modificar profile")
 		} else {
 			user.Profile = ur.Profile
 		}
-		if ur.Name == ""{
+		if ur.Name == "" {
 			log.Infof("No se intenta modificar Name")
 		} else {
 			user.Name = ur.Name
