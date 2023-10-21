@@ -15,6 +15,283 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/course/": {
+            "get": {
+                "description": "Get all courses that follows a criteria",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course request"
+                ],
+                "summary": "Get all courses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Title string for which you want to look",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ownerEmail string for which you want to look",
+                        "name": "ownerEmail",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "category string for which you want to look",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Age of the course you want to retrieve",
+                        "name": "desiredAge",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.CourseState"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create course using the token as a way to add account to course owner",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course request"
+                ],
+                "summary": "Create course",
+                "parameters": [
+                    {
+                        "description": "Title and Category are required",
+                        "name": "course",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CourseRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CourseState"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/{id}": {
+            "get": {
+                "description": "Fetch a course with a given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course request"
+                ],
+                "summary": "Fetch a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CourseState"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create class for a previously created course, if course does not exist this endpoint will fail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course request"
+                ],
+                "summary": "Create class for created course",
+                "parameters": [
+                    {
+                        "description": "Title is required",
+                        "name": "class",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.Class"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you want to add a course",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CourseState"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/{id}/{classId}": {
+            "get": {
+                "description": "Get class with id and class id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course request"
+                ],
+                "summary": "Fetch a class",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "class id you want to fetch",
+                        "name": "classId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Class"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Removes a class",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course request"
+                ],
+                "summary": "Remove class created",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "class id you want to remove",
+                        "name": "classId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/user/login/": {
             "post": {
                 "description": "SignInUser",
@@ -25,7 +302,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "login"
+                    "User request"
                 ],
                 "summary": "SignIn User",
                 "parameters": [
@@ -62,7 +339,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "getUser"
+                    "User request"
                 ],
                 "summary": "Get User Profile",
                 "parameters": [
@@ -95,7 +372,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "updateUser"
+                    "User request"
                 ],
                 "summary": "Update User Profile",
                 "parameters": [
@@ -142,7 +419,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "signup"
+                    "User request"
                 ],
                 "summary": "Sign Up User",
                 "parameters": [
@@ -174,6 +451,72 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "controller.Class": {
+            "type": "object",
+            "properties": {
+                "course_title": {
+                    "type": "string"
+                },
+                "metadata": {},
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.CourseRequest": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "classes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.Class"
+                    }
+                },
+                "max_age": {
+                    "type": "integer"
+                },
+                "metadata": {},
+                "min_age": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.CourseState": {
+            "type": "object",
+            "properties": {
+                "age_filtered": {
+                    "type": "boolean"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "classes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "courseTitle": {
+                    "type": "string"
+                },
+                "creatorEmail": {
+                    "type": "string"
+                },
+                "max_age": {
+                    "type": "integer"
+                },
+                "metadata": {},
+                "min_age": {
+                    "type": "integer"
+                }
+            }
+        },
         "controller.ErrorMsg": {
             "type": "object",
             "properties": {

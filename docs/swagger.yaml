@@ -1,4 +1,48 @@
 definitions:
+  controller.Class:
+    properties:
+      course_title:
+        type: string
+      metadata: {}
+      title:
+        type: string
+    type: object
+  controller.CourseRequest:
+    properties:
+      category:
+        type: string
+      classes:
+        items:
+          $ref: '#/definitions/controller.Class'
+        type: array
+      max_age:
+        type: integer
+      metadata: {}
+      min_age:
+        type: integer
+      title:
+        type: string
+    type: object
+  controller.CourseState:
+    properties:
+      age_filtered:
+        type: boolean
+      category:
+        type: string
+      classes:
+        items:
+          type: string
+        type: array
+      courseTitle:
+        type: string
+      creatorEmail:
+        type: string
+      max_age:
+        type: integer
+      metadata: {}
+      min_age:
+        type: integer
+    type: object
   controller.ErrorMsg:
     properties:
       reason:
@@ -34,6 +78,192 @@ definitions:
 info:
   contact: {}
 paths:
+  /course/:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses that follows a criteria
+      parameters:
+      - description: Title string for which you want to look
+        in: query
+        name: title
+        type: string
+      - description: ownerEmail string for which you want to look
+        in: query
+        name: ownerEmail
+        type: string
+      - description: category string for which you want to look
+        in: query
+        name: category
+        type: string
+      - description: Age of the course you want to retrieve
+        in: query
+        name: desiredAge
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.CourseState'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get all courses
+      tags:
+      - Course request
+    post:
+      consumes:
+      - application/json
+      description: Create course using the token as a way to add account to course
+        owner
+      parameters:
+      - description: Title and Category are required
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CourseRequest'
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CourseState'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Create course
+      tags:
+      - Course request
+  /course/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetch a course with a given id
+      parameters:
+      - description: course id which you look for
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CourseState'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Fetch a course
+      tags:
+      - Course request
+    post:
+      consumes:
+      - application/json
+      description: Create class for a previously created course, if course does not
+        exist this endpoint will fail
+      parameters:
+      - description: Title is required
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/controller.Class'
+      - description: course id which you want to add a course
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CourseState'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Create class for created course
+      tags:
+      - Course request
+  /course/{id}/{classId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a class
+      parameters:
+      - description: class id you want to remove
+        in: path
+        name: classId
+        required: true
+        type: string
+      - description: course id which you look for
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Remove class created
+      tags:
+      - Course request
+    get:
+      consumes:
+      - application/json
+      description: Get class with id and class id
+      parameters:
+      - description: class id you want to fetch
+        in: path
+        name: classId
+        required: true
+        type: string
+      - description: course id which you look for
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Class'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Fetch a class
+      tags:
+      - Course request
   /user/login/:
     post:
       consumes:
@@ -59,7 +289,7 @@ paths:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: SignIn User
       tags:
-      - login
+      - User request
   /user/profile/{id}:
     get:
       description: Get User Profile
@@ -82,7 +312,7 @@ paths:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: Get User Profile
       tags:
-      - getUser
+      - User request
     patch:
       description: Update User Profile
       parameters:
@@ -110,7 +340,7 @@ paths:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: Update User Profile
       tags:
-      - updateUser
+      - User request
   /user/signUp/:
     post:
       consumes:
@@ -136,5 +366,5 @@ paths:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: Sign Up User
       tags:
-      - signup
+      - User request
 swagger: "2.0"
