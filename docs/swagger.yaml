@@ -15,6 +15,8 @@ definitions:
         items:
           $ref: '#/definitions/controller.Class'
         type: array
+      is_school_oriented:
+        type: boolean
       max_age:
         type: integer
       metadata: {}
@@ -37,11 +39,24 @@ definitions:
         type: string
       creatorEmail:
         type: string
+      isSchoolOriented:
+        type: boolean
+      isSubscribed:
+        type: boolean
       max_age:
         type: integer
       metadata: {}
       min_age:
         type: integer
+    type: object
+  controller.CourseStateResponse:
+    properties:
+      amount:
+        type: integer
+      courses:
+        items:
+          $ref: '#/definitions/controller.CourseState'
+        type: array
     type: object
   controller.ErrorMsg:
     properties:
@@ -59,6 +74,7 @@ definitions:
     properties:
       email:
         type: string
+      metadata: {}
       name:
         type: string
       password:
@@ -70,6 +86,7 @@ definitions:
     properties:
       email:
         type: string
+      metadata: {}
       name:
         type: string
       profile:
@@ -106,9 +123,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/controller.CourseState'
-            type: array
+            $ref: '#/definitions/controller.CourseStateResponse'
         "404":
           description: Not Found
           schema:
@@ -156,6 +171,11 @@ paths:
       - description: course id which you look for
         in: path
         name: id
+        required: true
+        type: string
+      - description: token required for request
+        in: header
+        name: Authorization
         required: true
         type: string
       produces:
@@ -264,6 +284,69 @@ paths:
       summary: Fetch a class
       tags:
       - Course request
+  /course/subscribe/:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses in which the user has subscribed
+      parameters:
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CourseStateResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get subscribed courses
+      tags:
+      - Subscription
+  /course/subscribe/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Subscribe a user given by its token to a course
+      parameters:
+      - description: course in which the current user wants to subscribe
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: Object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Subscribe
+      tags:
+      - Subscription
   /user/login/:
     post:
       consumes:
@@ -292,11 +375,11 @@ paths:
       - User request
   /user/profile/{id}:
     get:
-      description: Get User Profile
+      description: Get User profile with token
       parameters:
-      - description: User ID
-        in: path
-        name: id
+      - description: token required for request
+        in: header
+        name: Authorization
         required: true
         type: string
       produces:

@@ -13,6 +13,21 @@ import (
 type Course struct {
 	service services.CourseService
 	tv      middleware.TokenValidator[UserRequest]
+	ss      services.SubscriptionService
+}
+
+func transform(course services.CourseState) CourseState {
+	return CourseState{
+		CreatorEmail:     course.CreatorEmail,
+		CourseTitle:      course.CourseTitle,
+		Classes:          course.Classes,
+		Category:         course.Category,
+		Metadata:         course.Metadata,
+		AgeFiltered:      course.AgeFiltered,
+		MinAge:           course.MinAge,
+		MaxAge:           course.MaxAge,
+		IsSchoolOriented: course.IsSchoolOriented,
+	}
 }
 
 // CreateCourse godoc
@@ -80,29 +95,49 @@ func (ce Course) CreateCourse(c *gin.Context) {
 	}
 	courseCreated := ce.service.AddCourse(course)
 
-	c.JSON(200, courseCreated)
+	c.JSON(200, transform(courseCreated))
 }
 
 // GetCourse godoc
 //
-//	@Summary		Fetch a course
-//	@Description	Fetch a course with a given id
-//	@Tags			Course request
-//	@Accept			json
-//	@Produce		json
-//	@Param			id      path		string	true	"course id which you look for"
-//	@Success		200		{object}	CourseState
-//	@Failure		404		{object}	ErrorMsg
-//	@Router			/course/{id} [get]
+//		@Summary		Fetch a course
+//		@Description	Fetch a course with a given id
+//		@Tags			Course request
+//		@Accept			json
+//		@Produce		json
+//		@Param			id      path		string	true	"course id which you look for"
+//	    @Param          Authorization   header string      true "token required for request"
+//		@Success		200		{object}	CourseState
+//		@Failure		404		{object}	ErrorMsg
+//		@Router			/course/{id} [get]
 func (ce Course) GetCourse(c *gin.Context) {
+	tokenData, err := ce.tv.GetTokenData(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
 	courseId := c.Param("id")
-	if course, err := ce.service.GetCourse(courseId); err != nil {
-		log.Errorf("error while getting course: %s", err.Error())
+	if cs, err := ce.getCourse(courseId); err != nil {
 		c.JSON(404, gin.H{
 			"reason": "course not found",
 		})
 	} else {
-		c.JSON(200, course)
+		_, err = ce.ss.GetSubscription(tokenData.Email, courseId)
+		cs.IsSubscribed = err == nil
+		c.JSON(200, cs)
+	}
+}
+
+func (ce Course) getCourse(courseId string) (CourseState, error) {
+	var cs CourseState
+	if course, err := ce.service.GetCourse(courseId); err != nil {
+		log.Errorf("error while getting course: %s", err.Error())
+		return cs, err
+	} else {
+		cs = transform(course)
+		return cs, err
 	}
 }
 
@@ -142,7 +177,7 @@ func (ce Course) AddClass(c *gin.Context) {
 			"reason": fmt.Sprintf("could not create class, error: %s", err.Error()),
 		})
 	} else {
-		c.JSON(200, course)
+		c.JSON(200, transform(course))
 	}
 }
 
@@ -215,7 +250,7 @@ func (ce Course) GetClass(c *gin.Context) {
 //	@Param ownerEmail query string false "ownerEmail string for which you want to look"
 //	@Param category query string false "category string for which you want to look"
 //	@Param desiredAge query int false "Age of the course you want to retrieve"
-//	@Success		200		{array}	CourseState
+//	@Success		200		{object}	CourseStateResponse
 //	@Failure        404     {object}    ErrorMsg
 //	@Router			/course/ [get]
 func (ce Course) GetCourses(c *gin.Context) {
@@ -246,9 +281,75 @@ func (ce Course) GetCourses(c *gin.Context) {
 	})
 }
 
-func CreateControllerCourse(s services.CourseService, validator middleware.TokenValidator[UserRequest]) Course {
+// Subscribe godoc
+//
+//		@Summary		Subscribe
+//		@Description	Subscribe a user given by its token to a course
+//		@Tags			Subscription
+//		@Accept			json
+//		@Produce		json
+//	    @Param          id   path string      true "course in which the current user wants to subscribe"
+//	    @Param          Authorization   header string      true "token required for request"
+//		@Success		200		{Object}	SubscriptionRequest
+//		@Failure        401     {object}    ErrorMsg
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/subscribe/{id} [post]
+func (ce Course) Subscribe(c *gin.Context) {
+	courseId := c.Param("id")
+	tokenData, err := ce.tv.GetTokenData(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	s := ce.ss.Subscribe(tokenData.Email, courseId)
+	sr := SubscriptionRequest{
+		UserId:      s.UserId,
+		CourseTitle: s.CourseId,
+		Metadata:    s.Metadata,
+	}
+	c.JSON(200, sr)
+}
+
+// GetSubscribed godoc
+//
+//		@Summary		Get subscribed courses
+//		@Description	Get all courses in which the user has subscribed
+//		@Tags			Subscription
+//		@Accept			json
+//		@Produce		json
+//	    @Param          Authorization   header string      true "token required for request"
+//		@Success		200		{object}	CourseStateResponse
+//		@Failure        401     {object}    ErrorMsg
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/subscribe/ [get]
+func (ce Course) GetSubscribed(c *gin.Context) {
+	tokenData, err := ce.tv.GetTokenData(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	s := ce.ss.GetAllUserSubscriptions(tokenData.Email)
+	courses := make([]CourseState, 0)
+	for _, course := range s {
+		if state, err := ce.getCourse(course.CourseId); err == nil {
+			state.IsSubscribed = true
+			courses = append(courses, state)
+		}
+	}
+	c.JSON(200, gin.H{
+		"courses": courses,
+		"amount":  len(courses),
+	})
+}
+
+func CreateControllerCourse(s services.CourseService, validator middleware.TokenValidator[UserRequest], ss services.SubscriptionService) Course {
 	return Course{
 		service: s,
 		tv:      validator,
+		ss:      ss,
 	}
 }

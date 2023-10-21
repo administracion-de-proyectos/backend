@@ -98,3 +98,25 @@ type CourseService interface {
 	GetClass(courseId, classId string) (Class, error)
 	GetCourses(values FilterValues) []CourseState
 }
+
+type Subscription struct {
+	UserId   string
+	CourseId string
+	Metadata interface{}
+}
+
+func (s Subscription) GetPrimaryKey() string {
+	return s.UserId
+}
+
+func (s Subscription) GetSecondaryKey() string {
+	return s.CourseId
+}
+
+type SubscriptionService interface {
+	Subscribe(userId, courseId string) Subscription
+	GetAllUserSubscriptions(userId string) []Subscription
+	GetAllCoursesSubscriptions(courseId string) []Subscription
+	GetSubscription(userId, courseId string) (Subscription, error)
+	RemoveSubscription(userId, courseId string) (Subscription, error)
+}

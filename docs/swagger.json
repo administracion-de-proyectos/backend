@@ -47,10 +47,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/controller.CourseState"
-                            }
+                            "$ref": "#/definitions/controller.CourseStateResponse"
                         }
                     },
                     "404": {
@@ -107,6 +104,101 @@
                 }
             }
         },
+        "/course/subscribe/": {
+            "get": {
+                "description": "Get all courses in which the user has subscribed",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get subscribed courses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CourseStateResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/subscribe/{id}": {
+            "post": {
+                "description": "Subscribe a user given by its token to a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Subscribe",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course in which the current user wants to subscribe",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "Object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/course/{id}": {
             "get": {
                 "description": "Fetch a course with a given id",
@@ -126,6 +218,13 @@
                         "description": "course id which you look for",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true
                     }
                 ],
@@ -323,7 +422,7 @@
         },
         "/user/profile/{id}": {
             "get": {
-                "description": "Get User Profile",
+                "description": "Get User profile with token",
                 "produces": [
                     "application/json"
                 ],
@@ -334,9 +433,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true
                     }
                 ],
@@ -464,6 +563,9 @@
                         "$ref": "#/definitions/controller.Class"
                     }
                 },
+                "is_school_oriented": {
+                    "type": "boolean"
+                },
                 "max_age": {
                     "type": "integer"
                 },
@@ -497,12 +599,32 @@
                 "creatorEmail": {
                     "type": "string"
                 },
+                "isSchoolOriented": {
+                    "type": "boolean"
+                },
+                "isSubscribed": {
+                    "type": "boolean"
+                },
                 "max_age": {
                     "type": "integer"
                 },
                 "metadata": {},
                 "min_age": {
                     "type": "integer"
+                }
+            }
+        },
+        "controller.CourseStateResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.CourseState"
+                    }
                 }
             }
         },
@@ -530,6 +652,7 @@
                 "email": {
                     "type": "string"
                 },
+                "metadata": {},
                 "name": {
                     "type": "string"
                 },
@@ -547,6 +670,7 @@
                 "email": {
                     "type": "string"
                 },
+                "metadata": {},
                 "name": {
                     "type": "string"
                 },

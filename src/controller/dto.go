@@ -39,15 +39,27 @@ type Class struct {
 	Metadata    interface{} `json:"metadata"`
 }
 
+type SubscriptionRequest struct {
+	UserId      string      `json:"user_id"`
+	CourseTitle string      `json:"course_title"`
+	Metadata    interface{} `json:"metadata"`
+}
+
 // CourseState Only for docs
 type CourseState struct {
-	CreatorEmail     string
-	CourseTitle      string
-	Classes          []string
-	Category         string
-	Metadata         interface{}
-	AgeFiltered      bool `json:"age_filtered,omitempty"`
-	MinAge           int  `json:"min_age,omitempty"`
-	MaxAge           int  `json:"max_age,omitempty"`
-	IsSchoolOriented bool
+	CreatorEmail     string      `json:"creatorEmail"`
+	CourseTitle      string      `json:"courseTitle"`
+	Classes          []string    `json:"classes"`
+	Category         string      `json:"category"`
+	Metadata         interface{} `json:"metadata"`
+	AgeFiltered      bool        `json:"age_filtered,omitempty"`
+	MinAge           int         `json:"min_age,omitempty"`
+	MaxAge           int         `json:"max_age,omitempty"`
+	IsSchoolOriented bool        `json:"isSchoolOriented"`
+	IsSubscribed     bool        `json:"isSubscribed"`
+}
+
+type CourseStateResponse struct {
+	Courses []CourseState
+	Amount  int
 }

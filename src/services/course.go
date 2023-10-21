@@ -91,6 +91,17 @@ func (c *classService) GetCourses(values FilterValues) []CourseState {
 	return filtered
 }
 
+func (c *classService) Subscribe(values FilterValues) []CourseState {
+	courses, _ := c.courseDB.GetAll()
+	filtered := make([]CourseState, 0)
+	for _, course := range courses {
+		if course.isOkayWithFilter(values) {
+			filtered = append(filtered, course)
+		}
+	}
+	return filtered
+}
+
 func CreateCourseService(courseDb db.DB[CourseState], classDb db.DB[Class]) *classService {
 	return &classService{
 		courseDB: courseDb,

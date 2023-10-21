@@ -87,21 +87,24 @@ func CreateDB[T Storable](table string, url string) (DB[T], error) {
 }
 
 func (p *postgresDb[T]) GetAll() ([]T, error) {
-	var id string
-	var d string
 	data := make([]T, 0)
 	r, err := p.db.Query(fmt.Sprintf("select * from %s", p.tableName))
 	if err != nil {
 		return data, fmt.Errorf("value not found: %v", err)
 	}
 	defer r.Close()
+	return getRows[T, *postgresDb[T]](r, p)
+}
+
+func getRows[T any, S scanner](r *sql.Rows, scanner S) ([]T, error) {
+	var d string
+	data := make([]T, 0)
 	for r.Next() {
-		err = r.Scan(&id, &d)
-		var iData T
-		if err != nil {
+		if err := scanner.scanRow(r, &d); err != nil {
 			log.Errorf("error while getting")
 			return data, fmt.Errorf("%w: %v", ErrNotFound, err)
 		}
+		var iData T
 		if err := json.Unmarshal([]byte(d), &iData); err != nil {
 			log.Errorf("error while unmarshalling")
 			return data, err
@@ -110,3 +113,9 @@ func (p *postgresDb[T]) GetAll() ([]T, error) {
 	}
 	return data, nil
 }
+
+func (p *postgresDb[T]) scanRow(r *sql.Rows, d *string) error {
+	var id string
+	return r.Scan(&id, d)
+}
+
