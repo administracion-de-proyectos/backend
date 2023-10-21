@@ -1,16 +1,18 @@
 package controller
 
 type UserRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password,omitempty"`
-	Name     string `json:"name"`
-	Profile  string `json:"profile"`
+	Email    string      `json:"email"`
+	Password string      `json:"password,omitempty"`
+	Name     string      `json:"name"`
+	Profile  string      `json:"profile"`
+	Metadata interface{} `json:"metadata"`
 }
 
 type UserResponse struct {
-	Email   string `json:"email"`
-	Name    string `json:"name"`
-	Profile string `json:"profile"`
+	Email    string      `json:"email"`
+	Name     string      `json:"name"`
+	Profile  string      `json:"profile"`
+	Metadata interface{} `json:"metadata"`
 }
 
 type Token struct {
@@ -22,12 +24,13 @@ type ErrorMsg struct {
 }
 
 type CourseRequest struct {
-	Title    string      `json:"title"`
-	Classes  []Class     `json:"classes"`
-	Metadata interface{} `json:"metadata"`
-	Category string      `json:"category"`
-	MinAge   *int        `json:"min_age,omitempty"`
-	MaxAge   *int        `json:"max_age,omitempty"`
+	Title            string      `json:"title"`
+	Classes          []Class     `json:"classes"`
+	Metadata         interface{} `json:"metadata"`
+	Category         string      `json:"category"`
+	MinAge           *int        `json:"min_age,omitempty"`
+	MaxAge           *int        `json:"max_age,omitempty"`
+	IsSchoolOriented bool        `json:"is_school_oriented"`
 }
 
 type Class struct {
@@ -38,12 +41,13 @@ type Class struct {
 
 // CourseState Only for docs
 type CourseState struct {
-	CreatorEmail string
-	CourseTitle  string
-	Classes      []string
-	Category     string
-	Metadata     interface{}
-	AgeFiltered  bool `json:"age_filtered,omitempty"`
-	MinAge       int  `json:"min_age,omitempty"`
-	MaxAge       int  `json:"max_age,omitempty"`
+	CreatorEmail     string
+	CourseTitle      string
+	Classes          []string
+	Category         string
+	Metadata         interface{}
+	AgeFiltered      bool `json:"age_filtered,omitempty"`
+	MinAge           int  `json:"min_age,omitempty"`
+	MaxAge           int  `json:"max_age,omitempty"`
+	IsSchoolOriented bool
 }

@@ -66,11 +66,12 @@ func (ce Course) CreateCourse(c *gin.Context) {
 		classToCreate = append(classToCreate, cs.Id)
 	}
 	course := services.CourseState{
-		CreatorEmail: tokenData.Email,
-		CourseTitle:  cr.Title,
-		Classes:      classToCreate,
-		Category:     cr.Category,
-		Metadata:     cr.Metadata,
+		CreatorEmail:     tokenData.Email,
+		CourseTitle:      cr.Title,
+		Classes:          classToCreate,
+		Category:         cr.Category,
+		Metadata:         cr.Metadata,
+		IsSchoolOriented: cr.IsSchoolOriented,
 	}
 	if cr.MinAge != nil {
 		course.MaxAge = *cr.MaxAge

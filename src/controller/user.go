@@ -44,7 +44,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	if err := uc.service.CreateUser(services.CreateUserState(ur.Email, ur.Password, ur.Name, ur.Profile)); err != nil {
+	if err := uc.service.CreateUser(services.CreateUserState(ur.Email, ur.Password, ur.Name, ur.Profile, ur.Metadata)); err != nil {
 		log.Errorf("could not write into db")
 		c.JSON(400, gin.H{
 			"reason": err.Error(),
@@ -128,12 +128,24 @@ func (uc UserController) sendUserWithId(c *gin.Context, userId string) {
 		})
 	} else {
 		c.JSON(200, UserResponse{
-			Email:   user.Email,
-			Name:    user.Name,
-			Profile: user.Profile,
+			Email:    user.Email,
+			Name:     user.Name,
+			Profile:  user.Profile,
+			Metadata: user.Metadata,
 		})
 	}
 }
+
+// GetUserWithToken godoc
+//
+//		@Summary		Get User Profile
+//		@Description	Get User profile with token
+//		@Tags			User request
+//	 @Param          Authorization   header string      true "token required for request"
+//		@Produce		json
+//		@Success		200	{object}	UserResponse
+//		@Failure		400	{object}	ErrorMsg
+//		@Router			/user/profile/{id} [get]
 func (uc UserController) GetUserWithToken(c *gin.Context) {
 	userTokenData, err := uc.validator.GetTokenData(c)
 	if err != nil {
@@ -184,6 +196,9 @@ func (uc UserController) UpdateUser(c *gin.Context) {
 		} else {
 			user.Name = ur.Name
 		}
+		if ur.Metadata != nil {
+			user.Metadata = ur.Metadata
+		}
 		if updatedUser, err := uc.service.UpdateUser(user); err != nil {
 			log.Errorf("error while updating user: %s", err.Error())
 			c.JSON(404, gin.H{
@@ -192,9 +207,10 @@ func (uc UserController) UpdateUser(c *gin.Context) {
 			return
 		} else {
 			c.JSON(200, UserResponse{
-				Email:   updatedUser.Email,
-				Name:    updatedUser.Name,
-				Profile: updatedUser.Profile,
+				Email:    updatedUser.Email,
+				Name:     updatedUser.Name,
+				Profile:  updatedUser.Profile,
+				Metadata: updatedUser.Metadata,
 			})
 		}
 	}

@@ -10,6 +10,7 @@ type UserState struct {
 	Password string
 	Name     string
 	Profile  string
+	Metadata interface{}
 }
 
 func (us UserState) GetPrimaryKey() string {
@@ -23,12 +24,13 @@ type UserService interface {
 	UpdateUser(u UserState) (UserState, error)
 }
 
-func CreateUserState(email, password, name, profile string) UserState {
+func CreateUserState(email, password, name, profile string, metadata interface{}) UserState {
 	return UserState{
 		email,
 		password,
 		name,
 		profile,
+		metadata,
 	}
 }
 
@@ -40,14 +42,15 @@ func CreateBasicUserState(email, password string) UserState {
 }
 
 type CourseState struct {
-	CreatorEmail string
-	CourseTitle  string
-	Classes      []string
-	Category     string
-	Metadata     interface{}
-	AgeFiltered  bool `json:"age_filtered,omitempty"`
-	MinAge       int  `json:"min_age,omitempty"`
-	MaxAge       int  `json:"max_age,omitempty"`
+	CreatorEmail     string
+	CourseTitle      string
+	Classes          []string
+	Category         string
+	Metadata         interface{}
+	AgeFiltered      bool `json:"age_filtered,omitempty"`
+	MinAge           int  `json:"min_age,omitempty"`
+	MaxAge           int  `json:"max_age,omitempty"`
+	IsSchoolOriented bool
 }
 
 func (cs CourseState) GetPrimaryKey() string {
@@ -69,10 +72,11 @@ func getClassId(courseTitle, classTitle string) string {
 }
 
 type FilterValues struct {
-	Title      string
-	OwnerEmail string
-	Category   string
-	DesiredAge *int
+	Title            string
+	OwnerEmail       string
+	Category         string
+	DesiredAge       *int
+	IsSchoolOriented *bool
 }
 
 func (cs CourseState) isOkayWithFilter(f FilterValues) bool {
@@ -81,6 +85,7 @@ func (cs CourseState) isOkayWithFilter(f FilterValues) bool {
 	ok = ok && strings.Contains(cs.Category, f.Category)
 	ok = ok && strings.Contains(cs.Category, f.Category)
 	ok = ok && (!(cs.AgeFiltered && f.DesiredAge != nil) || (cs.MinAge < *f.DesiredAge && cs.MaxAge > *f.DesiredAge))
+	ok = ok && (f.IsSchoolOriented == nil || *f.IsSchoolOriented == cs.IsSchoolOriented)
 	return ok
 }
 
