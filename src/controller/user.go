@@ -14,15 +14,16 @@ type UserController struct {
 }
 
 // CreateUser godoc
-// @Summary      Sign Up User
-// @Description  Create User Account 
-// @Tags         signup
-// @Accept       json
-// @Produce      json
-// @Param        user body UserRequest true "User required Data to SignUp"
-// @Success      200  {object}  Token 
-// @Failure      400  {object}  ErrorMsg
-// @Router       /user/signUp/ [post]
+//
+//	@Summary		Sign Up User
+//	@Description	Create User Account
+//	@Tags			User request
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		UserRequest	true	"User required Data to SignUp"
+//	@Success		200		{object}	Token
+//	@Failure		400		{object}	ErrorMsg
+//	@Router			/user/signUp/ [post]
 func (uc UserController) CreateUser(c *gin.Context) {
 	var ur UserRequest
 	if err := c.BindJSON(&ur); err != nil {
@@ -61,15 +62,16 @@ func (uc UserController) CreateUser(c *gin.Context) {
 }
 
 // SignInUser godoc
-// @Summary      SignIn User
-// @Description  SignInUser
-// @Tags         login
-// @Accept       json
-// @Produce      json
-// @Param        user body UserRequest true "Email and Password are required"
-// @Success      200  {object}  Token
-// @Failure      400  {object}  ErrorMsg
-// @Router       /user/login/ [post]
+//
+//	@Summary		SignIn User
+//	@Description	SignInUser
+//	@Tags			User request
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		UserRequest	true	"Email and Password are required"
+//	@Success		200		{object}	Token
+//	@Failure		400		{object}	ErrorMsg
+//	@Router			/user/login/ [post]
 func (uc UserController) SignInUser(c *gin.Context) {
 	var ur UserRequest
 	if err := c.BindJSON(&ur); err != nil {
@@ -103,15 +105,16 @@ func (uc UserController) SignInUser(c *gin.Context) {
 	}
 }
 
-// GetUserProfile godoc
-// @Summary      Get User Profile
-// @Description  Get User Profile
-// @Tags         getUser
-// @Param        id   path      string  true  "User ID"
-// @Produce      json
-// @Success      200  {object}  UserResponse
-// @Failure      400  {object}  ErrorMsg
-// @Router       /user/profile/{id} [get]
+// GetUser godoc
+//
+//	@Summary		Get User Profile
+//	@Description	Get User Profile
+//	@Tags			User request
+//	@Param			id	path	string	true	"User ID"
+//	@Produce		json
+//	@Success		200	{object}	UserResponse
+//	@Failure		400	{object}	ErrorMsg
+//	@Router			/user/profile/{id} [get]
 func (uc UserController) GetUser(c *gin.Context) {
 	userId := c.Param("id")
 	uc.sendUserWithId(c, userId)
@@ -144,16 +147,17 @@ func (uc UserController) GetUserWithToken(c *gin.Context) {
 	uc.sendUserWithId(c, userId)
 }
 
-// UpdateProfile godoc
-// @Summary      Update User Profile
-// @Description  Update User Profile
-// @Tags         updateUser
-// @Param        id   path      string  true  "User ID"
-// @Param        user body UserRequest true "Profile and Name are updatable"
-// @Produce      json
-// @Success      200  {object}  UserResponse
-// @Failure      400  {object}  ErrorMsg
-// @Router       /user/profile/{id} [patch]
+// UpdateUser godoc
+//
+//	@Summary		Update User Profile
+//	@Description	Update User Profile
+//	@Tags			User request
+//	@Param			id		path	string		true	"User ID"
+//	@Param			user	body	UserRequest	true	"Profile and Name are updatable"
+//	@Produce		json
+//	@Success		200	{object}	UserResponse
+//	@Failure		400	{object}	ErrorMsg
+//	@Router			/user/profile/{id} [patch]
 func (uc UserController) UpdateUser(c *gin.Context) {
 	userId := c.Param("id")
 	var ur UserRequest

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 type Course struct {
@@ -14,6 +15,18 @@ type Course struct {
 	tv      middleware.TokenValidator[UserRequest]
 }
 
+// CreateCourse godoc
+//
+//		@Summary		Create course
+//		@Description	Create course using the token as a way to add account to course owner
+//		@Tags			Course request
+//		@Accept			json
+//		@Produce		json
+//		@Param			course	body		CourseRequest	true	"Title and Category are required"
+//	    @Param          Authorization   header string      true "token required for request"
+//		@Success		200		{object}	CourseState
+//		@Failure		400		{object}	ErrorMsg
+//		@Router			/course/ [post]
 func (ce Course) CreateCourse(c *gin.Context) {
 	var tokenData UserRequest
 	var err error
@@ -30,9 +43,15 @@ func (ce Course) CreateCourse(c *gin.Context) {
 		})
 		return
 	}
-	if err := utils.FailIfZeroValue([]string{cr.Title}); err != nil {
+	if err := utils.FailIfZeroValue([]string{cr.Title, cr.Category}); err != nil {
 		c.JSON(400, gin.H{
 			"reason": "one of the required fields of title is empty",
+		})
+		return
+	}
+	if (cr.MaxAge != nil && cr.MinAge == nil) || (cr.MinAge != nil && cr.MaxAge == nil) || (cr.MinAge != nil && cr.MaxAge != nil && (*cr.MinAge == 0 || *cr.MaxAge == 0)) {
+		c.JSON(400, gin.H{
+			"reason": "if defined min or max age, then the other should be defined to (and also 0 is invalid)",
 		})
 		return
 	}
@@ -50,12 +69,30 @@ func (ce Course) CreateCourse(c *gin.Context) {
 		CreatorEmail: tokenData.Email,
 		CourseTitle:  cr.Title,
 		Classes:      classToCreate,
+		Category:     cr.Category,
+		Metadata:     cr.Metadata,
+	}
+	if cr.MinAge != nil {
+		course.MaxAge = *cr.MaxAge
+		course.MinAge = *cr.MinAge
+		course.AgeFiltered = true
 	}
 	courseCreated := ce.service.AddCourse(course)
 
 	c.JSON(200, courseCreated)
 }
 
+// GetCourse godoc
+//
+//	@Summary		Fetch a course
+//	@Description	Fetch a course with a given id
+//	@Tags			Course request
+//	@Accept			json
+//	@Produce		json
+//	@Param			id      path		string	true	"course id which you look for"
+//	@Success		200		{object}	CourseState
+//	@Failure		404		{object}	ErrorMsg
+//	@Router			/course/{id} [get]
 func (ce Course) GetCourse(c *gin.Context) {
 	courseId := c.Param("id")
 	if course, err := ce.service.GetCourse(courseId); err != nil {
@@ -68,6 +105,18 @@ func (ce Course) GetCourse(c *gin.Context) {
 	}
 }
 
+// AddClass godoc
+//
+//	@Summary		Create class for created course
+//	@Description	Create class for a previously created course, if course does not exist this endpoint will fail
+//	@Tags			Course request
+//	@Accept			json
+//	@Produce		json
+//	@Param			class	body		Class	true	"Title is required"
+//	@Param			id	path		string	true	"course id which you want to add a course"
+//	@Success		200		{object}	CourseState
+//	@Failure        400     {object}    ErrorMsg
+//	@Router			/course/{id} [post]
 func (ce Course) AddClass(c *gin.Context) {
 	courseId := c.Param("id")
 	var cr Class
@@ -96,6 +145,18 @@ func (ce Course) AddClass(c *gin.Context) {
 	}
 }
 
+// RemoveClass godoc
+//
+//	@Summary		Remove class created
+//	@Description	Removes a class
+//	@Tags			Course request
+//	@Accept			json
+//	@Produce		json
+//	@Param			classId	path		string	true	"class id you want to remove"
+//	@Param			id	path		string	true	"course id which you look for"
+//	@Success		204
+//	@Failure        400     {object}    ErrorMsg
+//	@Router			/course/{id}/{classId} [delete]
 func (ce Course) RemoveClass(c *gin.Context) {
 	courseId := c.Param("id")
 	classId := c.Param("classId")
@@ -109,6 +170,19 @@ func (ce Course) RemoveClass(c *gin.Context) {
 	c.JSON(204, gin.H{})
 }
 
+// GetClass godoc
+//
+//	@Summary		Fetch a class
+//	@Description	Get class with id and class id
+//	@Tags			Course request
+//	@Accept			json
+//	@Produce		json
+//	@Param			classId	path		string	true	"class id you want to fetch"
+//	@Param			id	path		string	true	"course id which you look for"
+//	@Success		200		{object}	Class
+//	@Failure        400     {object}    ErrorMsg
+//	@Failure        404     {object}    ErrorMsg
+//	@Router			/course/{id}/{classId} [get]
 func (ce Course) GetClass(c *gin.Context) {
 	courseId := c.Param("id")
 	classId := c.Param("classId")
@@ -129,10 +203,42 @@ func (ce Course) GetClass(c *gin.Context) {
 	}
 }
 
+// GetCourses godoc
+//
+//	@Summary		Get all courses
+//	@Description	Get all courses that follows a criteria
+//	@Tags			Course request
+//	@Accept			json
+//	@Produce		json
+//	@Param title query string false "Title string for which you want to look"
+//	@Param ownerEmail query string false "ownerEmail string for which you want to look"
+//	@Param category query string false "category string for which you want to look"
+//	@Param desiredAge query int false "Age of the course you want to retrieve"
+//	@Success		200		{array}	CourseState
+//	@Failure        404     {object}    ErrorMsg
+//	@Router			/course/ [get]
 func (ce Course) GetCourses(c *gin.Context) {
 	title := c.Query("title")
 	ownerEmail := c.Query("ownerEmail")
-	courses := ce.service.GetCourses(title, ownerEmail)
+	category := c.Query("category")
+	age := c.Query("desiredAge")
+	var numberAge *int = nil
+	if age != "" {
+		if iage, err := strconv.Atoi(age); err != nil {
+			c.JSON(404, gin.H{
+				"reason": "age should be a number",
+			})
+		} else {
+			numberAge = &iage
+		}
+	}
+	v := services.FilterValues{
+		Title:      title,
+		OwnerEmail: ownerEmail,
+		Category:   category,
+		DesiredAge: numberAge,
+	}
+	courses := ce.service.GetCourses(v)
 	c.JSON(200, gin.H{
 		"courses": courses,
 		"amount":  len(courses),

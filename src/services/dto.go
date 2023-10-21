@@ -1,6 +1,9 @@
 package services
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type UserState struct {
 	Email    string
@@ -40,6 +43,11 @@ type CourseState struct {
 	CreatorEmail string
 	CourseTitle  string
 	Classes      []string
+	Category     string
+	Metadata     interface{}
+	AgeFiltered  bool `json:"age_filtered,omitempty"`
+	MinAge       int  `json:"min_age,omitempty"`
+	MaxAge       int  `json:"max_age,omitempty"`
 }
 
 func (cs CourseState) GetPrimaryKey() string {
@@ -60,6 +68,22 @@ func getClassId(courseTitle, classTitle string) string {
 	return fmt.Sprintf("%s-%s", courseTitle, classTitle)
 }
 
+type FilterValues struct {
+	Title      string
+	OwnerEmail string
+	Category   string
+	DesiredAge *int
+}
+
+func (cs CourseState) isOkayWithFilter(f FilterValues) bool {
+	ok := strings.Contains(cs.CourseTitle, f.Title)
+	ok = ok && strings.Contains(cs.CreatorEmail, f.OwnerEmail)
+	ok = ok && strings.Contains(cs.Category, f.Category)
+	ok = ok && strings.Contains(cs.Category, f.Category)
+	ok = ok && (!(cs.AgeFiltered && f.DesiredAge != nil) || (cs.MinAge < *f.DesiredAge && cs.MaxAge > *f.DesiredAge))
+	return ok
+}
+
 type CourseService interface {
 	SetClassInPlaceN(n int, classTitle string, courseTitle string) CourseState
 	AddClass(class Class, shouldEditCourse bool) (CourseState, error)
@@ -67,5 +91,5 @@ type CourseService interface {
 	GetCourse(courseId string) (CourseState, error)
 	RemoveClass(courseId, classId string) error
 	GetClass(courseId, classId string) (Class, error)
-	GetCourses(title, ownerEmail string) []CourseState
+	GetCourses(values FilterValues) []CourseState
 }
