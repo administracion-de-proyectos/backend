@@ -250,6 +250,7 @@ func (ce Course) GetClass(c *gin.Context) {
 //	@Param ownerEmail query string false "ownerEmail string for which you want to look"
 //	@Param category query string false "category string for which you want to look"
 //	@Param desiredAge query int false "Age of the course you want to retrieve"
+//	@Param isSchoolOriented query bool false "true if school oriented, any other value otherwise"
 //	@Success		200		{object}	CourseStateResponse
 //	@Failure        404     {object}    ErrorMsg
 //	@Router			/course/ [get]
@@ -258,21 +259,29 @@ func (ce Course) GetCourses(c *gin.Context) {
 	ownerEmail := c.Query("ownerEmail")
 	category := c.Query("category")
 	age := c.Query("desiredAge")
+	isSchoolOrientedS := c.Query("isSchoolOriented")
 	var numberAge *int = nil
 	if age != "" {
 		if iage, err := strconv.Atoi(age); err != nil {
 			c.JSON(404, gin.H{
 				"reason": "age should be a number",
 			})
+			return
 		} else {
 			numberAge = &iage
 		}
 	}
+	var isSchoolOriented *bool = nil
+	if isSchoolOrientedS != "" {
+		b := isSchoolOrientedS == "true"
+		isSchoolOriented = &b
+	}
 	v := services.FilterValues{
-		Title:      title,
-		OwnerEmail: ownerEmail,
-		Category:   category,
-		DesiredAge: numberAge,
+		Title:            title,
+		OwnerEmail:       ownerEmail,
+		Category:         category,
+		DesiredAge:       numberAge,
+		IsSchoolOriented: isSchoolOriented,
 	}
 	courses := ce.service.GetCourses(v)
 	c.JSON(200, gin.H{
