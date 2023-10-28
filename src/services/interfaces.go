@@ -28,8 +28,8 @@ type UserService interface {
 type ExamsService interface {
 	Create(exam Exam)
 	DoExam(result StudentExam) error
-	GetScoreForExam(userEmail, courseId, classId string) Score
-	GetScoreForExams(userEmail, courseId string) []Score
+	GetScoreForExam(userEmail, courseId, classId string) (Score, error)
+	GetScoreForExams(userEmail, courseId string) ([]Score, error)
 	RemoveExam(courseId, classId string)
 	GetExam(courseId, classId string) (Exam, error)
 }

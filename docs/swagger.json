@@ -567,55 +567,7 @@
                 }
             }
         },
-        "/score/{courseId}/user/{userEmail}": {
-            "get": {
-                "description": "Given a course id and a user email, gets all the scores from that user in given course",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Exams request"
-                ],
-                "summary": "Get an exam",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "course id which you look for",
-                        "name": "courseId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "email you look for, is an exact match",
-                        "name": "userEmail",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/controller.Score"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ErrorMsg"
-                        }
-                    }
-                }
-            }
-        },
-        "/scores/{courseId}/{classId}/{userEmail}": {
+        "/scores/{courseId}/class/{classId}/{userEmail}": {
             "get": {
                 "description": "Given a course id and a class id and a user, gets the specific score",
                 "consumes": [
@@ -656,6 +608,54 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/controller.Score"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/scores/{courseId}/user/{userEmail}": {
+            "get": {
+                "description": "Given a course id and a user email, gets all the scores from that user in given course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Get an exam",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "email you look for, is an exact match",
+                        "name": "userEmail",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.Score"
+                            }
                         }
                     },
                     "400": {

@@ -534,40 +534,7 @@ paths:
       summary: Add submission
       tags:
       - Exams request
-  /score/{courseId}/user/{userEmail}:
-    get:
-      consumes:
-      - application/json
-      description: Given a course id and a user email, gets all the scores from that
-        user in given course
-      parameters:
-      - description: course id which you look for
-        in: path
-        name: courseId
-        required: true
-        type: string
-      - description: email you look for, is an exact match
-        in: path
-        name: userEmail
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/controller.Score'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controller.ErrorMsg'
-      summary: Get an exam
-      tags:
-      - Exams request
-  /scores/{courseId}/{classId}/{userEmail}:
+  /scores/{courseId}/class/{classId}/{userEmail}:
     get:
       consumes:
       - application/json
@@ -601,6 +568,39 @@ paths:
           schema:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: Get a score
+      tags:
+      - Exams request
+  /scores/{courseId}/user/{userEmail}:
+    get:
+      consumes:
+      - application/json
+      description: Given a course id and a user email, gets all the scores from that
+        user in given course
+      parameters:
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: email you look for, is an exact match
+        in: path
+        name: userEmail
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.Score'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get an exam
       tags:
       - Exams request
   /user/login/:

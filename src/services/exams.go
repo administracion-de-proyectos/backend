@@ -28,12 +28,12 @@ func (e *ExamService) DoExam(result StudentExam) error {
 	return nil
 }
 
-func (e *ExamService) GetScoreForExam(userEmail, courseId, classId string) Score {
+func (e *ExamService) GetScoreForExam(userEmail, courseId, classId string) (Score, error) {
 	submission, err := e.submissionDB.GetBoth(userEmail, getClassId(courseId, classId))
 	if err != nil {
-		log.Errorf("something fuckery has happened: %s", err.Error())
+		return Score{}, err
 	}
-	return e.getScore(submission)
+	return e.getScore(submission), nil
 }
 
 func (e *ExamService) getScore(submission StudentExam) Score {
@@ -54,10 +54,10 @@ func (e *ExamService) getScore(submission StudentExam) Score {
 	}
 }
 
-func (e *ExamService) GetScoreForExams(userEmail, courseId string) []Score {
+func (e *ExamService) GetScoreForExams(userEmail, courseId string) ([]Score, error) {
 	allSubmissions, err := e.submissionDB.GetPrimary(userEmail)
 	if err != nil {
-		log.Errorf("something fuckery has happened: %s", err.Error())
+		return nil, err
 	}
 	scores := make([]Score, 0)
 	for _, s := range allSubmissions {
@@ -65,7 +65,7 @@ func (e *ExamService) GetScoreForExams(userEmail, courseId string) []Score {
 			scores = append(scores, e.getScore(s))
 		}
 	}
-	return scores
+	return scores, nil
 }
 
 func (e *ExamService) RemoveExam(courseId, classId string) {

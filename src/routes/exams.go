@@ -25,7 +25,7 @@ func (r Routes) AddExamsRoutes(dbUrl string) error {
 	examGroup.DELETE("/:courseId/:classId", c.RemoveExam)
 	examGroup.POST("/submission", validator.SetTokenDataInContext, c.CreateSubmission)
 	subsGroup := r.Router.Group("/score")
-	subsGroup.GET("/:courseId/:classId/:userEmail", c.GetScore)
+	subsGroup.GET("/:courseId/class/:classId/:userEmail", c.GetScore)
 	subsGroup.GET("/:courseId/user/:userEmail", c.GetScores)
 	return nil
 }

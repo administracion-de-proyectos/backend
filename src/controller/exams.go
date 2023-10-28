@@ -162,8 +162,13 @@ func (e ExamsController) CreateSubmission(c *gin.Context) {
 			"reason": err.Error(),
 		})
 	}
-	score := e.es.GetScoreForExam(tokenData.Email, s.Course, s.Class)
-	c.JSON(200, score)
+	if score, err := e.es.GetScoreForExam(tokenData.Email, s.Course, s.Class); err != nil {
+		c.JSON(404, gin.H{
+			"reason": err.Error(),
+		})
+	} else {
+		c.JSON(200, score)
+	}
 }
 
 // GetScore godoc
@@ -178,12 +183,18 @@ func (e ExamsController) CreateSubmission(c *gin.Context) {
 //	@Param			userEmail	path		string	true	"email you look for, is an exact match"
 //	@Success		200 {object} Score
 //	@Failure        400     {object}    ErrorMsg
-//	@Router			/scores/{courseId}/{classId}/{userEmail} [get]
+//	@Router			/scores/{courseId}/class/{classId}/{userEmail} [get]
 func (e ExamsController) GetScore(c *gin.Context) {
 	courseId := c.Param("courseId")
 	classId := c.Param("classId")
 	userEmail := c.Param("userEmail")
-	c.JSON(200, e.es.GetScoreForExam(courseId, classId, userEmail))
+	if scores, err := e.es.GetScoreForExam(courseId, classId, userEmail); err != nil {
+		c.JSON(404, gin.H{
+			"reason": "could not find user email",
+		})
+	} else {
+		c.JSON(200, scores)
+	}
 }
 
 // GetScores godoc
@@ -197,11 +208,17 @@ func (e ExamsController) GetScore(c *gin.Context) {
 //	@Param			userEmail	path		string	true	"email you look for, is an exact match"
 //	@Success		200 {array} Score
 //	@Failure        400     {object}    ErrorMsg
-//	@Router			/score/{courseId}/user/{userEmail} [get]
+//	@Router			/scores/{courseId}/user/{userEmail} [get]
 func (e ExamsController) GetScores(c *gin.Context) {
 	courseId := c.Param("courseId")
 	userEmail := c.Param("userEmail")
-	c.JSON(200, e.es.GetScoreForExams(userEmail, courseId))
+	if score, err := e.es.GetScoreForExams(userEmail, courseId); err != nil {
+		c.JSON(404, gin.H{
+			"reason": err.Error(),
+		})
+	} else {
+		c.JSON(200, score)
+	}
 }
 
 func CreateControllerExams(s services.ExamsService, validator middleware.TokenValidator[UserRequest]) ExamsController {
