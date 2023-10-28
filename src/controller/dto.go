@@ -45,6 +45,27 @@ type SubscriptionRequest struct {
 	Metadata    interface{} `json:"metadata"`
 }
 
+type Point struct {
+	Question      string   `json:"question"`
+	Answer        string   `json:"answer"`
+	Possibilities []string `json:"possibilities"`
+}
+
+type CreateExamRequest struct {
+	Points []Point `json:"points" binding:"required"`
+}
+
+type SubmissionPoint struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
+}
+
+type Submission struct {
+	Course string            `json:"course" binding:"required"`
+	Class  string            `json:"class" binding:"required"`
+	Points []SubmissionPoint `json:"points" binding:"required"`
+}
+
 // CourseState Only for docs
 type CourseState struct {
 	CreatorEmail     string      `json:"creatorEmail"`
@@ -62,4 +83,16 @@ type CourseState struct {
 type CourseStateResponse struct {
 	Courses []CourseState
 	Amount  int
+}
+
+type Exam struct {
+	Points []Point `json:"points"`
+	Class  string  `json:"class"`
+	Course string  `json:"course"`
+}
+
+type Score struct {
+	TotalAmount   int    `json:"total_amount"`
+	CorrectAmount int    `json:"correct_amount"`
+	Email         string `json:"email"`
 }

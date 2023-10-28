@@ -52,6 +52,12 @@ const docTemplate = `{
                         "description": "Age of the course you want to retrieve",
                         "name": "desiredAge",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "true if school oriented, any other value otherwise",
+                        "name": "isSchoolOriented",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -391,6 +397,287 @@ const docTemplate = `{
                 }
             }
         },
+        "/exams/submission": {
+            "post": {
+                "description": "Given a user identified by its token, submit a resolution",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Add submission",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "At least one point is required",
+                        "name": "course",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.Submission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Score"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/exams/{courseId}/{classId}": {
+            "get": {
+                "description": "Given a course id and a class id, gets the specific exam",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Get an exam",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "class id you want to remove",
+                        "name": "classId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Exam"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Given a course id and a class id, creates an exam for the class",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Create an exam for a given class",
+                "parameters": [
+                    {
+                        "description": "At least one point is required",
+                        "name": "course",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CreateExamRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "class id you want to remove",
+                        "name": "classId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Removes an exam already created",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Remove exam created",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "class id you want to remove",
+                        "name": "classId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/score/{courseId}/user/{userEmail}": {
+            "get": {
+                "description": "Given a course id and a user email, gets all the scores from that user in given course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Get an exam",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "email you look for, is an exact match",
+                        "name": "userEmail",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.Score"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/scores/{courseId}/{classId}/{userEmail}": {
+            "get": {
+                "description": "Given a course id and a class id and a user, gets the specific score",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Get a score",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "class id you want to look for",
+                        "name": "classId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "email you look for, is an exact match",
+                        "name": "userEmail",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Score"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/user/login/": {
             "post": {
                 "description": "SignInUser",
@@ -639,12 +926,107 @@ const docTemplate = `{
                 }
             }
         },
+        "controller.CreateExamRequest": {
+            "type": "object",
+            "required": [
+                "points"
+            ],
+            "properties": {
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.Point"
+                    }
+                }
+            }
+        },
         "controller.ErrorMsg": {
             "type": "object",
             "properties": {
                 "reason": {
                     "type": "string",
                     "example": "mensaje de error"
+                }
+            }
+        },
+        "controller.Exam": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "type": "string"
+                },
+                "course": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.Point"
+                    }
+                }
+            }
+        },
+        "controller.Point": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "possibilities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.Score": {
+            "type": "object",
+            "properties": {
+                "correct_amount": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.Submission": {
+            "type": "object",
+            "required": [
+                "class",
+                "course",
+                "points"
+            ],
+            "properties": {
+                "class": {
+                    "type": "string"
+                },
+                "course": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.SubmissionPoint"
+                    }
+                }
+            }
+        },
+        "controller.SubmissionPoint": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
                 }
             }
         },

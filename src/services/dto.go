@@ -17,13 +17,6 @@ func (us UserState) GetPrimaryKey() string {
 	return us.Email
 }
 
-type UserService interface {
-	CreateUser(u UserState) error
-	CheckCredentials(u UserState) (UserState, error)
-	GetUser(userId string) (UserState, error)
-	UpdateUser(u UserState) (UserState, error)
-}
-
 func CreateUserState(email, password, name, profile string, metadata interface{}) UserState {
 	return UserState{
 		email,
@@ -89,16 +82,6 @@ func (cs CourseState) isOkayWithFilter(f FilterValues) bool {
 	return ok
 }
 
-type CourseService interface {
-	SetClassInPlaceN(n int, classTitle string, courseTitle string) CourseState
-	AddClass(class Class, shouldEditCourse bool) (CourseState, error)
-	AddCourse(course CourseState) CourseState
-	GetCourse(courseId string) (CourseState, error)
-	RemoveClass(courseId, classId string) error
-	GetClass(courseId, classId string) (Class, error)
-	GetCourses(values FilterValues) []CourseState
-}
-
 type Subscription struct {
 	UserId   string
 	CourseId string
@@ -113,10 +96,38 @@ func (s Subscription) GetSecondaryKey() string {
 	return s.CourseId
 }
 
-type SubscriptionService interface {
-	Subscribe(userId, courseId string) Subscription
-	GetAllUserSubscriptions(userId string) []Subscription
-	GetAllCoursesSubscriptions(courseId string) []Subscription
-	GetSubscription(userId, courseId string) (Subscription, error)
-	RemoveSubscription(userId, courseId string) (Subscription, error)
+type Point struct {
+	Question string
+	Options  []string
+	Answer   string
+}
+
+type Exam struct {
+	Points []Point `json:"points"`
+	Class  string  `json:"class"`
+	Course string  `json:"course"`
+}
+
+func (e Exam) GetPrimaryKey() string {
+	return getClassId(e.Course, e.Class)
+}
+
+type StudentExam struct {
+	StudentEmail string
+	Course       string
+	Class        string
+	Points       []Point // Done like this because I am lazy, but this should be just question and answer
+}
+type Score struct {
+	TotalAmount   int    `json:"total_amount"`
+	CorrectAmount int    `json:"correct_amount"`
+	Email         string `json:"email"`
+}
+
+func (s StudentExam) GetPrimaryKey() string {
+	return s.StudentEmail
+}
+
+func (s StudentExam) GetSecondaryKey() string {
+	return getClassId(s.Course, s.Class)
 }

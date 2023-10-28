@@ -58,10 +58,72 @@ definitions:
           $ref: '#/definitions/controller.CourseState'
         type: array
     type: object
+  controller.CreateExamRequest:
+    properties:
+      points:
+        items:
+          $ref: '#/definitions/controller.Point'
+        type: array
+    required:
+    - points
+    type: object
   controller.ErrorMsg:
     properties:
       reason:
         example: mensaje de error
+        type: string
+    type: object
+  controller.Exam:
+    properties:
+      class:
+        type: string
+      course:
+        type: string
+      points:
+        items:
+          $ref: '#/definitions/controller.Point'
+        type: array
+    type: object
+  controller.Point:
+    properties:
+      answer:
+        type: string
+      possibilities:
+        items:
+          type: string
+        type: array
+      question:
+        type: string
+    type: object
+  controller.Score:
+    properties:
+      correct_amount:
+        type: integer
+      email:
+        type: string
+      total_amount:
+        type: integer
+    type: object
+  controller.Submission:
+    properties:
+      class:
+        type: string
+      course:
+        type: string
+      points:
+        items:
+          $ref: '#/definitions/controller.SubmissionPoint'
+        type: array
+    required:
+    - class
+    - course
+    - points
+    type: object
+  controller.SubmissionPoint:
+    properties:
+      answer:
+        type: string
+      question:
         type: string
     type: object
   controller.Token:
@@ -117,6 +179,10 @@ paths:
         in: query
         name: desiredAge
         type: integer
+      - description: true if school oriented, any other value otherwise
+        in: query
+        name: isSchoolOriented
+        type: boolean
       produces:
       - application/json
       responses:
@@ -347,6 +413,196 @@ paths:
       summary: Subscribe
       tags:
       - Subscription
+  /exams/{courseId}/{classId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes an exam already created
+      parameters:
+      - description: class id you want to remove
+        in: path
+        name: classId
+        required: true
+        type: string
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Remove exam created
+      tags:
+      - Exams request
+    get:
+      consumes:
+      - application/json
+      description: Given a course id and a class id, gets the specific exam
+      parameters:
+      - description: class id you want to remove
+        in: path
+        name: classId
+        required: true
+        type: string
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Exam'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get an exam
+      tags:
+      - Exams request
+    post:
+      consumes:
+      - application/json
+      description: Given a course id and a class id, creates an exam for the class
+      parameters:
+      - description: At least one point is required
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateExamRequest'
+      - description: class id you want to remove
+        in: path
+        name: classId
+        required: true
+        type: string
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Create an exam for a given class
+      tags:
+      - Exams request
+  /exams/submission:
+    post:
+      consumes:
+      - application/json
+      description: Given a user identified by its token, submit a resolution
+      parameters:
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: At least one point is required
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/controller.Submission'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Score'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Add submission
+      tags:
+      - Exams request
+  /score/{courseId}/user/{userEmail}:
+    get:
+      consumes:
+      - application/json
+      description: Given a course id and a user email, gets all the scores from that
+        user in given course
+      parameters:
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: email you look for, is an exact match
+        in: path
+        name: userEmail
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.Score'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get an exam
+      tags:
+      - Exams request
+  /scores/{courseId}/{classId}/{userEmail}:
+    get:
+      consumes:
+      - application/json
+      description: Given a course id and a class id and a user, gets the specific
+        score
+      parameters:
+      - description: class id you want to look for
+        in: path
+        name: classId
+        required: true
+        type: string
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: email you look for, is an exact match
+        in: path
+        name: userEmail
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Score'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get a score
+      tags:
+      - Exams request
   /user/login/:
     post:
       consumes:

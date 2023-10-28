@@ -62,6 +62,7 @@ func (p *postgresWithIndex[T]) Update(obj T) {
 
 func (p *postgresWithIndex[T]) GetBoth(key string, secondary string) (T, error) {
 	var id string
+	var secondaryKey string
 	var d string
 	var data T
 	r, err := p.db.Query(fmt.Sprintf("select * from %s where id = '%s' and secondary ='%s'", p.tableName, key, secondary))
@@ -70,7 +71,7 @@ func (p *postgresWithIndex[T]) GetBoth(key string, secondary string) (T, error) 
 	}
 	defer r.Close()
 	r.Next()
-	err = r.Scan(&id, &d)
+	err = r.Scan(&id, &secondaryKey, &d)
 	if err != nil {
 		log.Errorf("error while getting with %s", err)
 		return data, fmt.Errorf("%w: %v", ErrNotFound, err)
