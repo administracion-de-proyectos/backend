@@ -145,7 +145,7 @@ func (uc UserController) sendUserWithId(c *gin.Context, userId string) {
 //		@Produce		json
 //		@Success		200	{object}	UserResponse
 //		@Failure		400	{object}	ErrorMsg
-//		@Router			/user/profile/{id} [get]
+//		@Router			/user/profile [get]
 func (uc UserController) GetUserWithToken(c *gin.Context) {
 	userTokenData, err := uc.validator.GetTokenData(c)
 	if err != nil {

@@ -770,7 +770,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/profile/{id}": {
+        "/user/profile": {
             "get": {
                 "description": "Get User profile with token",
                 "produces": [
@@ -786,6 +786,41 @@ const docTemplate = `{
                         "description": "token required for request",
                         "name": "Authorization",
                         "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/profile/{id}": {
+            "get": {
+                "description": "Get User Profile",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User request"
+                ],
+                "summary": "Get User Profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],
