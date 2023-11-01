@@ -188,7 +188,7 @@ func (e ExamsController) GetScore(c *gin.Context) {
 	courseId := c.Param("courseId")
 	classId := c.Param("classId")
 	userEmail := c.Param("userEmail")
-	if scores, err := e.es.GetScoreForExam(courseId, classId, userEmail); err != nil {
+	if scores, err := e.es.GetScoreForExam(userEmail, courseId, classId); err != nil {
 		c.JSON(404, gin.H{
 			"reason": "could not find user email",
 		})
@@ -220,7 +220,7 @@ func (e ExamsController) GetScoreAuth(c *gin.Context) {
 		})
 		return
 	}
-	if scores, err := e.es.GetScoreForExam(courseId, classId, tokenData.Email); err != nil {
+	if scores, err := e.es.GetScoreForExam(tokenData.Email, courseId, classId); err != nil {
 		c.JSON(404, gin.H{
 			"reason": "could not find user email",
 		})
