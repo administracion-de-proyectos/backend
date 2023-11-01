@@ -534,6 +534,42 @@ paths:
       summary: Add submission
       tags:
       - Exams request
+  /scores/{courseId}/class/{classId}:
+    get:
+      consumes:
+      - application/json
+      description: Given a course id and a class id and a user, gets the specific
+        score
+      parameters:
+      - description: class id you want to look for
+        in: path
+        name: classId
+        required: true
+        type: string
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Score'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get a score
+      tags:
+      - Exams request
   /scores/{courseId}/class/{classId}/{userEmail}:
     get:
       consumes:

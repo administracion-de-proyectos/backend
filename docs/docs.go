@@ -578,6 +578,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/scores/{courseId}/class/{classId}": {
+            "get": {
+                "description": "Given a course id and a class id and a user, gets the specific score",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Get a score",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "class id you want to look for",
+                        "name": "classId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Score"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/scores/{courseId}/class/{classId}/{userEmail}": {
             "get": {
                 "description": "Given a course id and a class id and a user, gets the specific score",

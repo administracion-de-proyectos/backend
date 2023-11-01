@@ -197,6 +197,38 @@ func (e ExamsController) GetScore(c *gin.Context) {
 	}
 }
 
+// GetScoreAuth godoc
+//
+//	@Summary		Get a score
+//	@Description	Given a course id and a class id and a user, gets the specific score
+//	@Tags			Exams request
+//	@Accept			json
+//	@Produce		json
+//	@Param			classId	path		string	true	"class id you want to look for"
+//	@Param			courseId	path		string	true	"course id which you look for"
+//	@Param          Authorization   header string      true "token required for request"
+//	@Success		200 {object} Score
+//	@Failure        400     {object}    ErrorMsg
+//	@Router			/scores/{courseId}/class/{classId} [get]
+func (e ExamsController) GetScoreAuth(c *gin.Context) {
+	courseId := c.Param("courseId")
+	classId := c.Param("classId")
+	tokenData, err := e.tv.GetTokenData(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	if scores, err := e.es.GetScoreForExam(courseId, classId, tokenData.Email); err != nil {
+		c.JSON(404, gin.H{
+			"reason": "could not find user email",
+		})
+	} else {
+		c.JSON(200, scores)
+	}
+}
+
 // GetScores godoc
 //
 //	@Summary		Get an exam
