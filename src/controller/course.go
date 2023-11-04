@@ -290,6 +290,35 @@ func (ce Course) GetCourses(c *gin.Context) {
 	})
 }
 
+// GetOwnedCourses godoc
+//
+//	@Summary		Get all own courses
+//	@Description	This is just a wrapper of GetCourses, in which you send the token, and we return the all courses
+//	@Tags			Course request
+//	@Accept			json
+//	@Produce		json
+//	@Param          Authorization   header string      true "token required for request"
+//	@Success		200		{array}	CourseStateResponse
+//	@Failure        404     {object}    ErrorMsg
+//	@Router			/courses/ [get]
+func (ce Course) GetOwnedCourses(c *gin.Context) {
+	tokenData, err := ce.tv.GetTokenData(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	v := services.FilterValues{
+		OwnerEmail: tokenData.Email,
+	}
+	courses := ce.service.GetCourses(v)
+	c.JSON(200, gin.H{
+		"courses": courses,
+		"amount":  len(courses),
+	})
+}
+
 // Subscribe godoc
 //
 //		@Summary		Subscribe
@@ -353,6 +382,31 @@ func (ce Course) GetSubscribed(c *gin.Context) {
 		"courses": courses,
 		"amount":  len(courses),
 	})
+}
+
+// GetAllSubscribed godoc
+//
+//		@Summary		Get subscribed courses
+//		@Description	Get all courses in which the user has subscribed
+//		@Tags			Subscription
+//		@Accept			json
+//		@Produce		json
+//	    @Param          id   path string      true "course id for which you want to get user subscribed"
+//		@Success		200		{array}	SubscriptionRequest
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/subscribe/courses/{id} [get]
+func (ce Course) GetAllSubscribed(c *gin.Context) {
+	courseId := c.Param("id")
+	submissions := ce.ss.GetAllCoursesSubscriptions(courseId)
+	subs := make([]SubscriptionRequest, 0)
+	for _, sub := range submissions {
+		subs = append(subs, SubscriptionRequest{
+			UserId:      sub.UserId,
+			CourseTitle: sub.CourseId,
+			Metadata:    sub.Metadata,
+		})
+	}
+	c.JSON(200, subs)
 }
 
 func CreateControllerCourse(s services.CourseService, validator middleware.TokenValidator[UserRequest], ss services.SubscriptionService) Course {

@@ -36,6 +36,20 @@ func (e *ExamService) GetScoreForExam(userEmail, courseId, classId string) (Scor
 	return e.getScore(submission), nil
 }
 
+func (e *ExamService) GetAllScoreForExams(courseId string) ([]Score, error) {
+	submissions, err := e.submissionDB.GetAll()
+	if err != nil {
+		return []Score{}, err
+	}
+	myCourseSubmissions := make([]Score, 0)
+	for _, sub := range submissions {
+		if sub.Course == courseId {
+			myCourseSubmissions = append(myCourseSubmissions, e.getScore(sub))
+		}
+	}
+	return myCourseSubmissions, nil
+}
+
 func (e *ExamService) getScore(submission StudentExam) Score {
 	answers, err := e.examDb.Get(submission.GetSecondaryKey())
 	if err != nil {

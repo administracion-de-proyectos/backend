@@ -30,8 +30,10 @@ func (r Routes) AddCoursesRoutes(dbUrl string) error {
 	courseGroup.GET("/:id/:classId", c.GetClass)
 	courseGroup.DELETE("/:id/:classId", c.RemoveClass)
 	courseGroup.GET("/", c.GetCourses)
+	r.Router.GET("/courses", validator.SetTokenDataInContext, c.GetOwnedCourses) // because I am fucking lazy
 	subsGroup := courseGroup.Group("/subscribe")
 	subsGroup.POST("/:id", validator.SetTokenDataInContext, c.Subscribe)
 	subsGroup.GET("/", validator.SetTokenDataInContext, c.GetSubscribed)
+	subsGroup.GET("/courses/:id", c.GetAllSubscribed)
 	return nil
 }

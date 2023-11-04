@@ -165,6 +165,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/course/subscribe/courses/{id}": {
+            "get": {
+                "description": "Get all courses in which the user has subscribed",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get subscribed courses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course id for which you want to get user subscribed",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.SubscriptionRequest"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/course/subscribe/{id}": {
             "post": {
                 "description": "Subscribe a user given by its token to a course",
@@ -390,6 +431,47 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/": {
+            "get": {
+                "description": "This is just a wrapper of GetCourses, in which you send the token, and we return the all courses",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course request"
+                ],
+                "summary": "Get all own courses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.CourseStateResponse"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/controller.ErrorMsg"
                         }
@@ -671,6 +753,47 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/controller.Score"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/scores/{courseId}/teacher": {
+            "get": {
+                "description": "Given a course id, returns all scores for that class. This method currently doesn't use token but it could for a future if we want extra sec",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Exams request"
+                ],
+                "summary": "Get all scores for class",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course id which you look for",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.Score"
+                            }
                         }
                     },
                     "400": {
@@ -1113,6 +1236,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.SubscriptionRequest": {
+            "type": "object",
+            "properties": {
+                "course_title": {
+                    "type": "string"
+                },
+                "metadata": {},
+                "user_id": {
                     "type": "string"
                 }
             }

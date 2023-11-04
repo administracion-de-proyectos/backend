@@ -126,6 +126,14 @@ definitions:
       question:
         type: string
     type: object
+  controller.SubscriptionRequest:
+    properties:
+      course_title:
+        type: string
+      metadata: {}
+      user_id:
+        type: string
+    type: object
   controller.Token:
     properties:
       token:
@@ -413,6 +421,61 @@ paths:
       summary: Subscribe
       tags:
       - Subscription
+  /course/subscribe/courses/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses in which the user has subscribed
+      parameters:
+      - description: course id for which you want to get user subscribed
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.SubscriptionRequest'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get subscribed courses
+      tags:
+      - Subscription
+  /courses/:
+    get:
+      consumes:
+      - application/json
+      description: This is just a wrapper of GetCourses, in which you send the token,
+        and we return the all courses
+      parameters:
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.CourseStateResponse'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get all own courses
+      tags:
+      - Course request
   /exams/{courseId}/{classId}:
     delete:
       consumes:
@@ -604,6 +667,34 @@ paths:
           schema:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: Get a score
+      tags:
+      - Exams request
+  /scores/{courseId}/teacher:
+    get:
+      consumes:
+      - application/json
+      description: Given a course id, returns all scores for that class. This method
+        currently doesn't use token but it could for a future if we want extra sec
+      parameters:
+      - description: course id which you look for
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.Score'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get all scores for class
       tags:
       - Exams request
   /scores/{courseId}/user/{userEmail}:

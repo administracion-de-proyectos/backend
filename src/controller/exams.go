@@ -253,6 +253,28 @@ func (e ExamsController) GetScores(c *gin.Context) {
 	}
 }
 
+// GetScoresTeacher godoc
+//
+//	@Summary		Get all scores for class
+//	@Description	Given a course id, returns all scores for that class. This method currently doesn't use token but it could for a future if we want extra sec
+//	@Tags			Exams request
+//	@Accept			json
+//	@Produce		json
+//	@Param			courseId	path		string	true	"course id which you look for"
+//	@Success		200 {array} Score
+//	@Failure        400     {object}    ErrorMsg
+//	@Router			/scores/{courseId}/teacher [get]
+func (e ExamsController) GetScoresTeacher(c *gin.Context) {
+	courseId := c.Param("courseId")
+	if score, err := e.es.GetAllScoreForExams(courseId); err != nil {
+		c.JSON(404, gin.H{
+			"reason": err.Error(),
+		})
+	} else {
+		c.JSON(200, score)
+	}
+}
+
 func CreateControllerExams(s services.ExamsService, validator middleware.TokenValidator[UserRequest]) ExamsController {
 	return ExamsController{
 		es: s,

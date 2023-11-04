@@ -28,5 +28,6 @@ func (r Routes) AddExamsRoutes(dbUrl string) error {
 	subsGroup.GET("/:courseId/class/:classId/:userEmail", c.GetScore)
 	subsGroup.GET("/:courseId/class/:classId", validator.SetTokenDataInContext, c.GetScoreAuth)
 	subsGroup.GET("/:courseId/user/:userEmail", c.GetScores)
+	subsGroup.GET("{courseId}/teacher", c.GetScoresTeacher)
 	return nil
 }

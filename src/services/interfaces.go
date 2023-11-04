@@ -32,4 +32,5 @@ type ExamsService interface {
 	GetScoreForExams(userEmail, courseId string) ([]Score, error)
 	RemoveExam(courseId, classId string)
 	GetExam(courseId, classId string) (Exam, error)
+	GetAllScoreForExams(courseI string) ([]Score, error)
 }
