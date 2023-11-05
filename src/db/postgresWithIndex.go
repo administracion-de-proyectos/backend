@@ -22,6 +22,16 @@ func (p *postgresWithIndex[T]) DeleteSpecific(key string, secondaryKey string) T
 	return r
 }
 
+func (p *postgresWithIndex[T]) GetAll() ([]T, error) {
+	data := make([]T, 0)
+	r, err := p.db.Query(fmt.Sprintf("select * from %s", p.tableName))
+	if err != nil {
+		return data, fmt.Errorf("value not found: %v", err)
+	}
+	defer r.Close()
+	return getRows[T, *postgresWithIndex[T]](r, p)
+}
+
 func CreateDBWithIndex[T StorableIndex](table string, url string) (WithIndex[T], error) {
 	db, err := sql.Open("postgres", fmt.Sprintf("%s?sslmode=disable", url))
 
