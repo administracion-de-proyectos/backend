@@ -65,6 +65,7 @@ func (e *ExamService) getScore(submission StudentExam) Score {
 		TotalAmount:   len(answers.Points),
 		CorrectAmount: correct,
 		Email:         submission.StudentEmail,
+		ClassId:       submission.Class,
 	}
 }
 

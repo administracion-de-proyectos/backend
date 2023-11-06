@@ -95,4 +95,5 @@ type Score struct {
 	TotalAmount   int    `json:"total_amount"`
 	CorrectAmount int    `json:"correct_amount"`
 	Email         string `json:"email"`
+	CourseId      string `json:"course_id"`
 }

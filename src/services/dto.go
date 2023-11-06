@@ -122,6 +122,7 @@ type Score struct {
 	TotalAmount   int    `json:"total_amount"`
 	CorrectAmount int    `json:"correct_amount"`
 	Email         string `json:"email"`
+	ClassId       string `json:"classId"`
 }
 
 func (s StudentExam) GetPrimaryKey() string {
