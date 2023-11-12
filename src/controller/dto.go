@@ -1,5 +1,7 @@
 package controller
 
+import "backend-admin-proyect/src/services"
+
 type UserRequest struct {
 	Email    string      `json:"email"`
 	Password string      `json:"password,omitempty"`
@@ -66,6 +68,16 @@ type Submission struct {
 	Points []SubmissionPoint `json:"points" binding:"required"`
 }
 
+type CommentRequest struct {
+	Course  string `json:"course" binding:"required"`
+	Comment string `json:"comment" binding:"required"`
+}
+
+type RateDTO struct {
+	Course string `json:"course" binding:"required"`
+	Rate   int    `json:"rate" binding:"required"`
+}
+
 // CourseState Only for docs
 type CourseState struct {
 	CreatorEmail     string      `json:"creatorEmail"`
@@ -96,4 +108,21 @@ type Score struct {
 	CorrectAmount int    `json:"correct_amount"`
 	Email         string `json:"email"`
 	CourseId      string `json:"course_id"`
+}
+
+type Comment struct {
+	CreatedAt  int    `json:"created_at"`
+	UserId     string `json:"user_id"`
+	Commentary string `json:"comment"`
+}
+
+type Comments struct {
+	CourseId string    `json:"course_id"`
+	Data     []Comment `json:"comments"`
+}
+
+type RateResponse struct {
+	CourseId string          `json:"course_id"`
+	RateAvg  float64         `json:"rate_avg"`
+	RateArr  []services.Rate `json:"rate_arr"`
 }

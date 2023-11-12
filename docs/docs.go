@@ -121,6 +121,256 @@ const docTemplate = `{
                 }
             }
         },
+        "/course/comments": {
+            "post": {
+                "description": "Given a user identified by its token, add a comment for him",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommentRating"
+                ],
+                "summary": "Add a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Everything is required",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Comments"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/comments/{courseId}": {
+            "get": {
+                "description": "Given a course, retrieves all comments associated with it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommentRating"
+                ],
+                "summary": "Get comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course id which you want to get the comment",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Comments"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/group/": {
+            "get": {
+                "description": "Given a user identified by its token, returns all students subscribed to it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request, it must be of a teacher",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/group/add/{userId}": {
+            "post": {
+                "description": "Given a user identified by its token, and another given by param, add the second one to a group of the first one",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Add to group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request, it must be of a teacher",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user id which you want to add to your group",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/rate/add": {
+            "post": {
+                "description": "Given a user identified by its token, add a rate for him",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommentRating"
+                ],
+                "summary": "Add a rate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Everything is required",
+                        "name": "rate",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.RateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/course/rate/{courseId}": {
+            "get": {
+                "description": "Given a course, returns all rates associated with it and the avg",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommentRating"
+                ],
+                "summary": "Get rates",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "course id which you want to get the comment",
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.RateResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/course/subscribe/": {
             "get": {
                 "description": "Get all courses in which the user has subscribed",
@@ -1059,6 +1309,49 @@ const docTemplate = `{
                 }
             }
         },
+        "controller.Comment": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.CommentRequest": {
+            "type": "object",
+            "required": [
+                "comment",
+                "course"
+            ],
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "course": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.Comments": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.Comment"
+                    }
+                },
+                "course_id": {
+                    "type": "string"
+                }
+            }
+        },
         "controller.CourseRequest": {
             "type": "object",
             "properties": {
@@ -1193,11 +1486,46 @@ const docTemplate = `{
                 }
             }
         },
+        "controller.RateDTO": {
+            "type": "object",
+            "required": [
+                "course",
+                "rate"
+            ],
+            "properties": {
+                "course": {
+                    "type": "string"
+                },
+                "rate": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.RateResponse": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "rate_arr": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/services.Rate"
+                    }
+                },
+                "rate_avg": {
+                    "type": "number"
+                }
+            }
+        },
         "controller.Score": {
             "type": "object",
             "properties": {
                 "correct_amount": {
                     "type": "integer"
+                },
+                "course_id": {
+                    "type": "string"
                 },
                 "email": {
                     "type": "string"
@@ -1290,6 +1618,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "profile": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.Rate": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "user_email": {
                     "type": "string"
                 }
             }

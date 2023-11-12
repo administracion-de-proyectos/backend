@@ -7,6 +7,34 @@ definitions:
       title:
         type: string
     type: object
+  controller.Comment:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  controller.CommentRequest:
+    properties:
+      comment:
+        type: string
+      course:
+        type: string
+    required:
+    - comment
+    - course
+    type: object
+  controller.Comments:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/controller.Comment'
+        type: array
+      course_id:
+        type: string
+    type: object
   controller.CourseRequest:
     properties:
       category:
@@ -95,10 +123,33 @@ definitions:
       question:
         type: string
     type: object
+  controller.RateDTO:
+    properties:
+      course:
+        type: string
+      rate:
+        type: integer
+    required:
+    - course
+    - rate
+    type: object
+  controller.RateResponse:
+    properties:
+      course_id:
+        type: string
+      rate_arr:
+        items:
+          $ref: '#/definitions/services.Rate'
+        type: array
+      rate_avg:
+        type: number
+    type: object
   controller.Score:
     properties:
       correct_amount:
         type: integer
+      course_id:
+        type: string
       email:
         type: string
       total_amount:
@@ -160,6 +211,15 @@ definitions:
       name:
         type: string
       profile:
+        type: string
+    type: object
+  services.Rate:
+    properties:
+      course_id:
+        type: string
+      score:
+        type: integer
+      user_email:
         type: string
     type: object
 info:
@@ -358,6 +418,173 @@ paths:
       summary: Fetch a class
       tags:
       - Course request
+  /course/comments:
+    post:
+      consumes:
+      - application/json
+      description: Given a user identified by its token, add a comment for him
+      parameters:
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Everything is required
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Comments'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Add a comment
+      tags:
+      - CommentRating
+  /course/comments/{courseId}:
+    get:
+      consumes:
+      - application/json
+      description: Given a course, retrieves all comments associated with it
+      parameters:
+      - description: course id which you want to get the comment
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Comments'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get comment
+      tags:
+      - CommentRating
+  /course/group/:
+    get:
+      consumes:
+      - application/json
+      description: Given a user identified by its token, returns all students subscribed
+        to it
+      parameters:
+      - description: token required for request, it must be of a teacher
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get group
+      tags:
+      - Subscription
+  /course/group/add/{userId}:
+    post:
+      consumes:
+      - application/json
+      description: Given a user identified by its token, and another given by param,
+        add the second one to a group of the first one
+      parameters:
+      - description: token required for request, it must be of a teacher
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: user id which you want to add to your group
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Add to group
+      tags:
+      - Subscription
+  /course/rate/{courseId}:
+    get:
+      consumes:
+      - application/json
+      description: Given a course, returns all rates associated with it and the avg
+      parameters:
+      - description: course id which you want to get the comment
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.RateResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Get rates
+      tags:
+      - CommentRating
+  /course/rate/add:
+    post:
+      consumes:
+      - application/json
+      description: Given a user identified by its token, add a rate for him
+      parameters:
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Everything is required
+        in: body
+        name: rate
+        required: true
+        schema:
+          $ref: '#/definitions/controller.RateDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Add a rate
+      tags:
+      - CommentRating
   /course/subscribe/:
     get:
       consumes:

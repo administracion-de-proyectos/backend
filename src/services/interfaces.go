@@ -34,3 +34,18 @@ type ExamsService interface {
 	GetExam(courseId, classId string) (Exam, error)
 	GetAllScoreForExams(courseI string) ([]Score, error)
 }
+
+type CommentService interface {
+	AddComment(courseId string, comment string, userId string) (Comments, error)
+	GetComments(courseId string) (Comments, error)
+}
+
+type Group interface {
+	AddToGroup(teacherEmail, studentEmail string) error
+	GetGroup(teacherEmail string) []string
+}
+
+type RateInterface interface {
+	AddRate(courseId, userId string, rate int) error
+	GetRating(courseId string) []Rate
+}

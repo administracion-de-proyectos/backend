@@ -66,7 +66,7 @@ func (p *postgresWithIndex[T]) Update(obj T) {
 	}
 	jsonObject, _ := json.Marshal(obj)
 	log.Debugf("data is being saved: %v\n", obj)
-	r, err := p.db.Query(fmt.Sprintf("update %s SET data='%v' where id='%s' and seconday='%s'", p.tableName, string(jsonObject), obj.GetPrimaryKey(), obj.GetSecondaryKey()))
+	r, err := p.db.Query(fmt.Sprintf("update %s SET data='%v' where id = '%s' and secondary ='%s'", p.tableName, string(jsonObject), obj.GetPrimaryKey(), obj.GetSecondaryKey()))
 	log.Debugf("rows returned %v, error %v\n", r, err)
 }
 

@@ -132,3 +132,41 @@ func (s StudentExam) GetPrimaryKey() string {
 func (s StudentExam) GetSecondaryKey() string {
 	return getClassId(s.Course, s.Class)
 }
+
+type Comment struct {
+	CreatedAt  int64  `json:"created_at"`
+	UserId     string `json:"user_id"`
+	Commentary string `json:"comment"`
+}
+
+type Comments struct {
+	CourseId string    `json:"course_id"`
+	Data     []Comment `json:"comments"`
+}
+
+type Rate struct {
+	CourseId  string `json:"course_id"`
+	Score     int    `json:"score"`
+	UserEmail string `json:"user_email"`
+}
+
+type GroupDto struct {
+	OwnerEmail    string   `json:"owner_email"`
+	StudentsGroup []string `json:"students_group"`
+}
+
+func (g GroupDto) GetPrimaryKey() string {
+	return g.OwnerEmail
+}
+
+func (c Comments) GetPrimaryKey() string {
+	return c.CourseId
+}
+
+func (r Rate) GetPrimaryKey() string {
+	return r.UserEmail
+}
+
+func (r Rate) GetSecondaryKey() string {
+	return r.CourseId
+}

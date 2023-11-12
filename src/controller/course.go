@@ -8,12 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"strconv"
+	"strings"
 )
 
 type Course struct {
 	service services.CourseService
 	tv      middleware.TokenValidator[UserRequest]
 	ss      services.SubscriptionService
+	cs      services.CommentService
+	gs      services.Group
+	rs      services.RateInterface
 }
 
 func transform(course services.CourseState) CourseState {
@@ -43,19 +47,8 @@ func transform(course services.CourseState) CourseState {
 //		@Failure		400		{object}	ErrorMsg
 //		@Router			/course/ [post]
 func (ce Course) CreateCourse(c *gin.Context) {
-	var tokenData UserRequest
-	var err error
-	var cr CourseRequest
-	if tokenData, err = ce.tv.GetTokenData(c); err != nil {
-		c.JSON(401, gin.H{
-			"reason": "invalid token",
-		})
-		return
-	}
-	if err := c.BindJSON(&cr); err != nil {
-		c.JSON(400, gin.H{
-			"reason": err.Error(),
-		})
+	tokenData, cr, done := extractData[CourseRequest](c, ce)
+	if done {
 		return
 	}
 	if err := utils.FailIfZeroValue([]string{cr.Title, cr.Category}); err != nil {
@@ -94,8 +87,33 @@ func (ce Course) CreateCourse(c *gin.Context) {
 		course.AgeFiltered = true
 	}
 	courseCreated := ce.service.AddCourse(course)
+	if cr.IsSchoolOriented {
+		students := ce.gs.GetGroup(tokenData.Email)
+		for _, s := range students {
+			ce.ss.Subscribe(s, courseCreated.CourseTitle)
+		}
+	}
 
 	c.JSON(200, transform(courseCreated))
+}
+
+func extractData[T any](c *gin.Context, ce Course) (UserRequest, T, bool) {
+	var tokenData UserRequest
+	var err error
+	var cr T
+	if tokenData, err = ce.tv.GetTokenData(c); err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return UserRequest{}, cr, true
+	}
+	if err := c.BindJSON(&cr); err != nil {
+		c.JSON(400, gin.H{
+			"reason": err.Error(),
+		})
+		return UserRequest{}, cr, true
+	}
+	return tokenData, cr, false
 }
 
 // GetCourse godoc
@@ -409,10 +427,214 @@ func (ce Course) GetAllSubscribed(c *gin.Context) {
 	c.JSON(200, subs)
 }
 
-func CreateControllerCourse(s services.CourseService, validator middleware.TokenValidator[UserRequest], ss services.SubscriptionService) Course {
+// AddComment godoc
+//
+//		@Summary		Add a comment
+//		@Description	Given a user identified by its token, add a comment for him
+//		@Tags			CommentRating
+//		@Accept			json
+//		@Produce		json
+//	    @Param          Authorization   header string      true "token required for request"
+//		@Param			comment 	body		CommentRequest	true	"Everything is required"
+//		@Success		200		{object}	Comments
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/comments [post]
+func (ce Course) AddComment(c *gin.Context) {
+	tokenData, cr, done := extractData[CommentRequest](c, ce)
+	if done {
+		return
+	}
+	if err := utils.FailIfZeroValue([]string{cr.Course, cr.Comment}); err != nil {
+		c.JSON(400, gin.H{
+			"reason": "one of the required fields of title is empty",
+		})
+		return
+	}
+	if comments, err := ce.cs.AddComment(cr.Course, cr.Comment, tokenData.Email); err != nil {
+		c.JSON(400, gin.H{
+			"reason": fmt.Sprintf("some error happened when creating the course: %s", err.Error()),
+		})
+	} else {
+		c.JSON(200, comments)
+	}
+}
+
+// GetComment godoc
+//
+//		@Summary		Get comment
+//		@Description	Given a course, retrieves all comments associated with it
+//		@Tags			CommentRating
+//		@Accept			json
+//		@Produce		json
+//	    @Param			courseId	path		string	true	"course id which you want to get the comment"
+//		@Success		200		{object}	Comments
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/comments/{courseId} [get]
+func (ce Course) GetComment(c *gin.Context) {
+	courseId := c.Param("courseId")
+	if _, err := ce.service.GetCourse(courseId); err != nil {
+		c.JSON(404, gin.H{
+			"reason": fmt.Sprintf("course does not exist: %s", err.Error()),
+		})
+		return
+	}
+	comments, _ := ce.cs.GetComments(courseId)
+	c.JSON(200, comments)
+}
+
+// AddToGroup godoc
+//
+//		@Summary		Add to group
+//		@Description	Given a user identified by its token, and another given by param, add the second one to a group of the first one
+//		@Tags			Subscription
+//		@Accept			json
+//		@Produce		json
+//	    @Param          Authorization   header string      true "token required for request, it must be of a teacher"
+//	    @Param			userId	path		string	true	"user id which you want to add to your group"
+//		@Success		204
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/group/add/{userId} [post]
+func (ce Course) AddToGroup(c *gin.Context) {
+	var tokenData UserRequest
+	var err error
+	if tokenData, err = ce.tv.GetTokenData(c); err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	if strings.ToLower(tokenData.Profile) != "teacher" {
+		c.JSON(403, gin.H{
+			"reason": "token is not from teacher",
+		})
+		return
+	}
+	ue := c.Param("userId")
+	if ue == "" {
+		c.JSON(400, gin.H{
+			"reason": "email can not be empty",
+		})
+		return
+	}
+	if err := ce.gs.AddToGroup(tokenData.Email, ue); err != nil {
+		c.JSON(400, gin.H{
+			"reason": fmt.Sprintf("error while adding to group: %s", err.Error()),
+		})
+	} else {
+		tValue := true
+		fv := services.FilterValues{
+			OwnerEmail:       tokenData.Email,
+			IsSchoolOriented: &tValue,
+		}
+		for _, cs := range ce.service.GetCourses(fv) {
+			ce.ss.Subscribe(ue, cs.CourseTitle)
+		}
+		c.JSON(204, nil)
+	}
+}
+
+// GetGroup godoc
+//
+//		@Summary		Get group
+//		@Description	Given a user identified by its token, returns all students subscribed to it
+//		@Tags			Subscription
+//		@Accept			json
+//		@Produce		json
+//	    @Param          Authorization   header string      true "token required for request, it must be of a teacher"
+//		@Success		200 {array} string
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/group/ [get]
+func (ce Course) GetGroup(c *gin.Context) {
+	var tokenData UserRequest
+	var err error
+	if tokenData, err = ce.tv.GetTokenData(c); err != nil {
+		c.JSON(401, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	if strings.ToLower(tokenData.Profile) != "teacher" {
+		c.JSON(403, gin.H{
+			"reason": "token is not from teacher",
+		})
+		return
+	}
+	c.JSON(200, ce.gs.GetGroup(tokenData.Email))
+}
+
+// AddRate godoc
+//
+//		@Summary		Add a rate
+//		@Description	Given a user identified by its token, add a rate for him
+//		@Tags			CommentRating
+//		@Accept			json
+//		@Produce		json
+//	    @Param          Authorization   header string      true "token required for request"
+//		@Param			rate 	body		RateDTO	true	"Everything is required"
+//		@Success		204
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/rate/add [post]
+func (ce Course) AddRate(c *gin.Context) {
+	tokenData, cr, done := extractData[RateDTO](c, ce)
+	if done {
+		return
+	}
+	if err := utils.FailIfZeroValue([]string{cr.Course}); err != nil {
+		c.JSON(400, gin.H{
+			"reason": "one of the required fields of title is empty",
+		})
+		return
+	}
+	if err := ce.rs.AddRate(cr.Course, tokenData.Email, cr.Rate); err != nil {
+		c.JSON(400, gin.H{
+			"reason": fmt.Sprintf("some error happened when creating the rate: %s", err.Error()),
+		})
+	} else {
+		c.JSON(204, nil)
+	}
+}
+
+// GetRate godoc
+//
+//		@Summary		Get rates
+//		@Description	Given a course, returns all rates associated with it and the avg
+//		@Tags			CommentRating
+//		@Accept			json
+//		@Produce		json
+//	    @Param			courseId	path		string	true	"course id which you want to get the comment"
+//		@Success		200		{object}	RateResponse
+//		@Failure        404     {object}    ErrorMsg
+//		@Router			/course/rate/{courseId} [get]
+func (ce Course) GetRate(c *gin.Context) {
+	courseId := c.Param("courseId")
+	if _, err := ce.service.GetCourse(courseId); err != nil {
+		c.JSON(404, gin.H{
+			"reason": fmt.Sprintf("course does not exist: %s", err.Error()),
+		})
+		return
+	}
+	avg := 0
+	rates := ce.rs.GetRating(courseId)
+	for _, r := range rates {
+		avg += r.Score
+	}
+	var avgF float64
+	if len(rates) > 0 {
+		avgF = float64(avg) / float64(len(rates))
+	}
+	c.JSON(200, RateResponse{
+		CourseId: courseId,
+		RateAvg:  avgF,
+		RateArr:  rates,
+	})
+}
+func CreateControllerCourse(s services.CourseService, validator middleware.TokenValidator[UserRequest], ss services.SubscriptionService, cs services.CommentService, gs services.Group, rs services.RateInterface) Course {
 	return Course{
 		service: s,
 		tv:      validator,
 		ss:      ss,
+		cs:      cs,
+		gs:      gs,
+		rs:      rs,
 	}
 }
