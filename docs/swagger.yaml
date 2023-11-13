@@ -957,6 +957,38 @@ paths:
       summary: Get an exam
       tags:
       - Exams request
+  /user/find:
+    get:
+      description: Given a query param search, find all users that fit that criteria
+      parameters:
+      - description: Title string for which you want to look
+        in: query
+        name: email
+        type: string
+      - description: ownerEmail string for which you want to look
+        in: query
+        name: name
+        type: string
+      - description: category string for which you want to look
+        in: query
+        name: profile
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.UserResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Find user profiles
+      tags:
+      - User request
   /user/login/:
     post:
       consumes:

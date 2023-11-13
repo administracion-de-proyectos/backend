@@ -23,6 +23,7 @@ type UserService interface {
 	CheckCredentials(u UserState) (UserState, error)
 	GetUser(userId string) (UserState, error)
 	UpdateUser(u UserState) (UserState, error)
+	FindUser(fv FilterValuesUser) []UserState
 }
 
 type ExamsService interface {

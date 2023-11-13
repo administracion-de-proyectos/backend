@@ -120,6 +120,34 @@ func (uc UserController) GetUser(c *gin.Context) {
 	uc.sendUserWithId(c, userId)
 }
 
+// FindUsers godoc
+//
+//	@Summary		Find user profiles
+//	@Description	Given a query param search, find all users that fit that criteria
+//	@Tags			User request
+//	@Param email query string false "Title string for which you want to look"
+//	@Param name query string false "ownerEmail string for which you want to look"
+//	@Param profile query string false "category string for which you want to look"
+//	@Produce		json
+//	@Success		200	{array}	UserResponse
+//	@Failure		400	{object}	ErrorMsg
+//	@Router			/user/find [get]
+func (uc UserController) FindUsers(c *gin.Context) {
+	email := c.Query("email")
+	name := c.Query("name")
+	profile := c.Query("profile")
+	fv := services.FilterValuesUser{
+		Email:   email,
+		Profile: profile,
+		Name:    name,
+	}
+	ur := make([]UserResponse, 0)
+	for _, us := range uc.service.FindUser(fv) {
+		ur = append(ur, ToUserResponse(us))
+	}
+	c.JSON(200, ur)
+}
+
 func (uc UserController) sendUserWithId(c *gin.Context, userId string) {
 	if user, err := uc.service.GetUser(userId); err != nil {
 		log.Errorf("error while getting user: %s", err.Error())
@@ -127,12 +155,16 @@ func (uc UserController) sendUserWithId(c *gin.Context, userId string) {
 			"reason": "user not found",
 		})
 	} else {
-		c.JSON(200, UserResponse{
-			Email:    user.Email,
-			Name:     user.Name,
-			Profile:  user.Profile,
-			Metadata: user.Metadata,
-		})
+		c.JSON(200, ToUserResponse(user))
+	}
+}
+
+func ToUserResponse(user services.UserState) UserResponse {
+	return UserResponse{
+		Email:    user.Email,
+		Name:     user.Name,
+		Profile:  user.Profile,
+		Metadata: user.Metadata,
 	}
 }
 

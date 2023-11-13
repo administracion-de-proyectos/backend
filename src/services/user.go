@@ -3,6 +3,7 @@ package services
 import (
 	"backend-admin-proyect/src/db"
 	"fmt"
+	"strings"
 )
 
 type userService struct {
@@ -34,7 +35,30 @@ func (s *userService) UpdateUser(u UserState) (UserState, error) {
 	return s.db.Get(u.GetPrimaryKey())
 }
 
+type FilterValuesUser struct {
+	Email   string
+	Profile string
+	Name    string
+}
 
+func (s *userService) FindUser(fv FilterValuesUser) []UserState {
+	uss, _ := s.db.GetAll()
+	response := make([]UserState, 0)
+	for _, us := range uss {
+		if us.isOkay(fv) {
+			response = append(response, us)
+		}
+	}
+	return response
+}
+
+func (us UserState) isOkay(fv FilterValuesUser) bool {
+	ok := true
+	ok = ok && strings.Contains(us.Email, fv.Email)
+	ok = ok && strings.Contains(us.Name, fv.Name)
+	ok = ok && strings.Contains(strings.ToLower(us.Profile), strings.ToLower(fv.Profile))
+	return ok
+}
 func CreateUserService(db db.DB[UserState]) UserService {
 	return &userService{db: db}
 }

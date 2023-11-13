@@ -1103,6 +1103,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/find": {
+            "get": {
+                "description": "Given a query param search, find all users that fit that criteria",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User request"
+                ],
+                "summary": "Find user profiles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Title string for which you want to look",
+                        "name": "email",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ownerEmail string for which you want to look",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "category string for which you want to look",
+                        "name": "profile",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.UserResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/user/login/": {
             "post": {
                 "description": "SignInUser",
