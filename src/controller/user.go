@@ -250,8 +250,8 @@ func (uc UserController) UpdateUser(c *gin.Context) {
 
 // SetUserPaid godoc
 //
-//		@Summary		Get User Profile
-//		@Description	Get User profile with token
+//		@Summary		Set user to has paid
+//		@Description	set User has to have paid to the platform with their token to identify themselves
 //		@Tags			User request
 //	 @Param          Authorization   header string      true "token required for request"
 //		@Produce		json
