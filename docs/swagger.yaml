@@ -207,6 +207,8 @@ definitions:
     properties:
       email:
         type: string
+      has_paid:
+        type: boolean
       metadata: {}
       name:
         type: string
@@ -1087,6 +1089,30 @@ paths:
           schema:
             $ref: '#/definitions/controller.ErrorMsg'
       summary: Update User Profile
+      tags:
+      - User request
+  /user/profile/paid:
+    post:
+      description: set User has to have paid to the platform with their token to identify
+        themselves
+      parameters:
+      - description: token required for request
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorMsg'
+      summary: Set user to has paid
       tags:
       - User request
   /user/signUp/:

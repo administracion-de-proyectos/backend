@@ -1227,6 +1227,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/profile/paid": {
+            "post": {
+                "description": "set User has to have paid to the platform with their token to identify themselves",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User request"
+                ],
+                "summary": "Set user to has paid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token required for request",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/user/profile/{id}": {
             "get": {
                 "description": "Get User Profile",
@@ -1661,6 +1696,9 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
+                },
+                "has_paid": {
+                    "type": "boolean"
                 },
                 "metadata": {},
                 "name": {
