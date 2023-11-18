@@ -248,6 +248,39 @@ func (uc UserController) UpdateUser(c *gin.Context) {
 	}
 }
 
+// SetUserPaid godoc
+//
+//		@Summary		Get User Profile
+//		@Description	Get User profile with token
+//		@Tags			User request
+//	 @Param          Authorization   header string      true "token required for request"
+//		@Produce		json
+//		@Success		200	{object}	UserResponse
+//		@Failure		400	{object}	ErrorMsg
+//		@Router			/user/profile/paid [post]
+func (uc UserController) SetUserPaid(c *gin.Context) {
+	userTokenData, err := uc.validator.GetTokenData(c)
+	if err != nil {
+		log.Errorf("error while checking token: %s", err.Error())
+		c.JSON(403, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	}
+	var user services.UserState
+	if user, err = uc.service.GetUser(userTokenData.Email); err != nil {
+		log.Errorf("weird error: %s", err.Error())
+		c.JSON(403, gin.H{
+			"reason": "invalid token",
+		})
+		return
+	} else {
+		user.HasPaid = true
+		user, _ = uc.service.UpdateUser(user)
+	}
+	c.JSON(200, user)
+}
+
 func CreateUserController(s services.UserService, validator middleware.TokenValidator[UserRequest]) UserController {
 	return UserController{service: s, validator: validator}
 }

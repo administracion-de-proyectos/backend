@@ -11,6 +11,7 @@ type UserState struct {
 	Name     string
 	Profile  string
 	Metadata interface{}
+	HasPaid  bool `json:"has_paid"`
 }
 
 func (us UserState) GetPrimaryKey() string {
@@ -24,6 +25,7 @@ func CreateUserState(email, password, name, profile string, metadata interface{}
 		name,
 		profile,
 		metadata,
+		false,
 	}
 }
 

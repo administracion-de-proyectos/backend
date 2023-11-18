@@ -15,6 +15,7 @@ type UserResponse struct {
 	Name     string      `json:"name"`
 	Profile  string      `json:"profile"`
 	Metadata interface{} `json:"metadata"`
+	HasPaid  bool        `json:"has_paid"`
 }
 
 type Token struct {
