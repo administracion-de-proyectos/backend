@@ -165,6 +165,7 @@ func ToUserResponse(user services.UserState) UserResponse {
 		Name:     user.Name,
 		Profile:  user.Profile,
 		Metadata: user.Metadata,
+		HasPaid:  user.HasPaid,
 	}
 }
 
@@ -278,7 +279,7 @@ func (uc UserController) SetUserPaid(c *gin.Context) {
 		user.HasPaid = true
 		user, _ = uc.service.UpdateUser(user)
 	}
-	c.JSON(200, user)
+	c.JSON(200, ToUserResponse(user))
 }
 
 func CreateUserController(s services.UserService, validator middleware.TokenValidator[UserRequest]) UserController {
